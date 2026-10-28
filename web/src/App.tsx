@@ -618,26 +618,26 @@ export default function App() {
               <svg viewBox="0 0 48 48" className="w-10 h-10 drop-shadow-md">
                 <defs>
                   <linearGradient id="softShieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#38bdf8" />
-                    <stop offset="50%" stopColor="#2dd4bf" />
-                    <stop offset="100%" stopColor="#a78bfa" />
+                    <stop offset="0%" stopColor="#49299a" />
+                    <stop offset="60%" stopColor="#45edf2" />
+                    <stop offset="100%" stopColor="#e8e8fc" />
                   </linearGradient>
                   <radialGradient id="softCoreGrad" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stopColor="#7dd3fc" />
-                    <stop offset="100%" stopColor="#0f172a" />
+                    <stop offset="0%" stopColor="#45edf2" />
+                    <stop offset="100%" stopColor="#0e1625" />
                   </radialGradient>
                 </defs>
                 <path
                   d="M24 5 L40 11 C40 25 33 37 24 43 C15 37 8 25 8 11 Z"
-                  fill="#030305"
+                  fill="#0e1625"
                   stroke="url(#softShieldGrad)"
                   strokeWidth="2.2"
                 />
                 <circle cx="24" cy="24" r="7" fill="url(#softCoreGrad)" opacity="0.9" />
                 <path d="M24 16 L24 32 M16 24 L32 24" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round" />
                 <circle cx="24" cy="24" r="2.5" fill="#ffffff" />
-                <circle cx="17" cy="19" r="1.5" fill="#38bdf8" />
-                <circle cx="31" cy="19" r="1.5" fill="#a78bfa" />
+                <circle cx="17" cy="19" r="1.5" fill="#45edf2" />
+                <circle cx="31" cy="19" r="1.5" fill="#49299a" />
               </svg>
             </div>
             <div>
@@ -811,7 +811,7 @@ export default function App() {
               <button
                 onClick={() => handleGenerateAttack()}
                 disabled={generating}
-                className="w-full py-2 px-3 rounded-lg text-xs font-semibold bg-gradient-to-r from-sky-600/80 to-teal-600/80 hover:from-sky-500/90 hover:to-teal-500/90 disabled:opacity-40 text-white shadow-sm transition-all cursor-pointer flex items-center justify-center space-x-2"
+                className="w-full py-2 px-3 rounded-lg text-xs font-semibold bg-gradient-to-r from-[#49299a] via-[#35267d] to-[#45edf2] hover:from-[#5933bd] hover:to-[#5ef0f5] disabled:opacity-40 text-[#e8e8fc] shadow-[0_0_15px_rgba(69,237,242,0.28)] transition-all cursor-pointer flex items-center justify-center space-x-2 active:scale-98"
               >
                 <span>{generating ? 'Simulating Attack Vector...' : '⚡ Launch Simulated Attack'}</span>
               </button>
@@ -952,7 +952,7 @@ export default function App() {
                               </p>
                               <div className="w-full bg-[#121218] h-1.5 rounded-full overflow-hidden border border-[#1f1f2a]">
                                 <div
-                                  className="bg-gradient-to-r from-sky-400 to-teal-400 h-full rounded-full transition-all duration-500"
+                                  className="bg-gradient-to-r from-[#49299a] to-[#45edf2] h-full rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(69,237,242,0.3)]"
                                   style={{ width: `${Math.min(100, f.value)}%` }}
                                 ></div>
                               </div>
@@ -1098,19 +1098,19 @@ export default function App() {
           {activeTab === 'graph' && (
             <div className="space-y-3">
               {/* Executive 1-Line Summary Banner */}
-              <div className="p-3 bg-[#0a0f1d] border border-cyan-900/40 rounded-xl text-xs text-cyan-200/90 font-sans flex items-center space-x-2.5">
+              <div className="p-3 bg-gradient-to-r from-[#0e1625] via-black to-[#0e1625] border border-[#49299a]/50 rounded-xl text-xs text-[#e8e8fc] font-sans flex items-center space-x-2.5 shadow-[0_0_20px_rgba(73,41,154,0.18)]">
                 <span className="text-base shrink-0">💡</span>
                 <span><strong className="text-white">Executive Summary:</strong> Visual kill chain tracing how stolen credentials penetrate internal sessions, pivot through cloud roles, and attempt data theft against customer vaults—stopping attacks before exfiltration.</span>
               </div>
 
-              <div className="p-4 border border-[#1c1c26] rounded-2xl bg-[#08080c] space-y-3 shadow-sm">
+              <div className="p-4 border border-[#49299a]/40 rounded-2xl bg-gradient-to-b from-[#0e1625]/80 via-black to-[#0e1625]/90 space-y-3 shadow-[0_0_30px_rgba(14,22,37,0.8)] backdrop-blur-sm">
                 {/* Header & Controls - strictly ONE line with equal-scale Play & Reset buttons */}
-                <div className="flex items-center justify-between gap-3 pb-2.5 border-b border-[#161622] flex-nowrap">
+                <div className="flex items-center justify-between gap-3 pb-2.5 border-b border-[#49299a]/30 flex-nowrap">
                   <div className="flex items-center space-x-2 min-w-0 shrink">
                     <h2 className="text-sm font-bold text-white whitespace-nowrap flex items-center space-x-2">
-                      <span>Attack Timeline &amp; Blast Radius</span>
+                      <span className="text-[#e8e8fc]">Attack Timeline &amp; Blast Radius</span>
                       <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold uppercase tracking-wider shrink-0 ${
-                        isSimulating ? 'bg-rose-950 text-rose-300 border border-rose-800/60 animate-pulse' : 'bg-[#061710] text-emerald-300 border border-emerald-800/40'
+                        isSimulating ? 'bg-rose-950 text-rose-300 border border-rose-800/60 animate-pulse' : 'bg-[#0e1625] text-[#45edf2] border border-[#45edf2]/50 shadow-[0_0_8px_rgba(69,237,242,0.25)]'
                       }`}>
                         {isSimulating ? '● SIMULATING' : 'LIVE'}
                       </span>
@@ -1130,7 +1130,7 @@ export default function App() {
                             resetAttackSimulation()
                           }
                         }}
-                        className="bg-[#101016] border border-[#222230] text-zinc-200 text-xs rounded-lg px-2.5 py-1.5 font-mono outline-none cursor-pointer max-w-[170px] truncate focus:border-cyan-500/50"
+                        className="bg-[#0e1625] border border-[#49299a]/50 text-[#e8e8fc] text-xs rounded-lg px-2.5 py-1.5 font-mono outline-none cursor-pointer max-w-[170px] truncate focus:border-[#45edf2]"
                       >
                         {alerts.map(a => (
                           <option key={a.alert_id} value={a.alert_id}>
@@ -1153,7 +1153,7 @@ export default function App() {
                       ) : (
                         <button
                           onClick={startAttackSimulation}
-                          className="h-8 px-3.5 rounded-lg bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 border border-cyan-400/40 text-white text-xs font-bold cursor-pointer transition-all flex items-center justify-center space-x-1.5 shadow-[0_0_12px_rgba(56,189,248,0.25)] active:scale-95"
+                          className="h-8 px-3.5 rounded-lg bg-gradient-to-r from-[#49299a] via-[#35267d] to-[#45edf2] hover:from-[#5933bd] hover:to-[#5ef0f5] border border-[#45edf2]/60 text-[#e8e8fc] text-xs font-bold cursor-pointer transition-all flex items-center justify-center space-x-1.5 shadow-[0_0_16px_rgba(69,237,242,0.35)] active:scale-95"
                         >
                           <span>▶</span>
                           <span className="whitespace-nowrap">Play Attack</span>
@@ -1161,7 +1161,7 @@ export default function App() {
                       )}
                       <button
                         onClick={resetAttackSimulation}
-                        className="h-8 px-3.5 rounded-lg bg-[#141824] hover:bg-[#1c2234] border border-[#263045] hover:border-cyan-500/40 text-zinc-200 text-xs font-bold cursor-pointer transition-all flex items-center justify-center space-x-1.5 active:scale-95 shadow-sm"
+                        className="h-8 px-3.5 rounded-lg bg-[#0e1625] hover:bg-[#162136] border border-[#49299a]/50 hover:border-[#45edf2]/60 text-[#e8e8fc] text-xs font-bold cursor-pointer transition-all flex items-center justify-center space-x-1.5 active:scale-95 shadow-sm"
                         title="Reset simulation to initial state"
                       >
                         <span>⟳</span>
@@ -1173,8 +1173,8 @@ export default function App() {
                         onClick={() => setShowFeedOnGraph(!showFeedOnGraph)}
                         className={`h-8 px-2.5 rounded-lg border text-[11px] font-mono transition-all flex items-center space-x-1.5 cursor-pointer whitespace-nowrap ${
                           showFeedOnGraph
-                            ? 'bg-cyan-950/80 text-cyan-300 border-cyan-700/60'
-                            : 'bg-[#12121c] text-zinc-300 border-[#222230] hover:text-white hover:border-cyan-500/50'
+                            ? 'bg-[#49299a]/40 text-[#45edf2] border-[#45edf2]/60'
+                            : 'bg-[#0e1625] text-zinc-300 border-[#49299a]/40 hover:text-white hover:border-[#45edf2]/50'
                         }`}
                         title={showFeedOnGraph ? "Collapse Activity Stream to maximize graph width" : "Show Activity Stream side panel"}
                       >
@@ -1185,17 +1185,17 @@ export default function App() {
                 </div>
 
                 {/* Simulation Step Progress & Narrative Telemetry Ticker */}
-                <div className="p-2.5 rounded-xl border border-[#181826] bg-[#060810] space-y-2 font-mono">
+                <div className="p-2.5 rounded-xl border border-[#49299a]/40 bg-gradient-to-r from-[#0e1625] via-black to-[#0e1625] space-y-2 font-mono shadow-inner">
                   <div className="flex items-center justify-between text-xs">
                     <div className="flex items-center space-x-2">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
-                        simStep === 0 ? 'bg-zinc-800 text-zinc-300' :
-                        simStep === 1 ? 'bg-indigo-950 text-indigo-300 border border-indigo-700/50' :
+                        simStep === 0 ? 'bg-[#0e1625] text-[#e8e8fc] border border-[#49299a]/40' :
+                        simStep === 1 ? 'bg-[#181136] text-[#45edf2] border border-[#49299a]' :
                         simStep === 2 ? 'bg-rose-950 text-rose-300 border border-rose-700/50' :
                         simStep === 3 ? 'bg-amber-950 text-amber-300 border border-amber-700/50' :
-                        simStep === 4 ? 'bg-sky-950 text-sky-300 border border-sky-700/50' :
+                        simStep === 4 ? 'bg-[#0e1625] text-[#45edf2] border border-[#45edf2]/60' :
                         simStep === 5 ? 'bg-red-950 text-red-200 border border-red-700/60' :
-                        'bg-emerald-950 text-emerald-300 border border-emerald-700/50'
+                        'bg-[#061e1a] text-[#45edf2] border border-emerald-600/50'
                       }`}>
                         {simStep === 0 && '⚪ READY • Click Play to Highlight Attack Arrows'}
                         {simStep === 1 && '🚨 STEP 1/5: INFILTRATION ARROW (Okta Auth)'}
@@ -1207,7 +1207,7 @@ export default function App() {
                       </span>
 
                       <span className="text-zinc-400 text-[11px]">
-                        Target: <span className="text-white font-semibold">{formatIdentity(hopIdentity)}</span>
+                        Target: <span className="text-[#e8e8fc] font-semibold">{formatIdentity(hopIdentity)}</span>
                       </span>
                     </div>
 
@@ -1229,8 +1229,8 @@ export default function App() {
                           }}
                           className={`px-2 py-0.5 rounded cursor-pointer transition-all ${
                             simStep >= s.step
-                              ? (s.step === 5 ? 'bg-red-900/60 text-red-200 border border-red-700/50 font-bold' : (s.step === 6 ? 'bg-emerald-950 text-emerald-300 border border-emerald-700/50' : 'bg-cyan-950 text-cyan-300 border border-cyan-800/40'))
-                              : 'bg-[#101018] text-zinc-500 hover:text-zinc-300 border border-[#1a1a26]'
+                              ? (s.step === 5 ? 'bg-red-900/60 text-red-200 border border-red-700/50 font-bold' : (s.step === 6 ? 'bg-emerald-950 text-emerald-300 border border-emerald-700/50' : 'bg-[#181136] text-[#45edf2] border border-[#45edf2]/50 shadow-[0_0_8px_rgba(69,237,242,0.2)]'))
+                              : 'bg-[#0e1625] text-zinc-500 hover:text-[#e8e8fc] border border-[#49299a]/30'
                           }`}
                         >
                           {s.label}
@@ -1240,9 +1240,9 @@ export default function App() {
                   </div>
 
                   {/* Narrative Ticker Message */}
-                  <div className="text-xs text-zinc-300 bg-[#090d16] p-2 rounded-lg border border-[#141b2a] flex items-center justify-between">
+                  <div className="text-xs text-[#e8e8fc] bg-[#0e1625] p-2 rounded-lg border border-[#49299a]/30 flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <span className="text-cyan-400 font-bold">▶</span>
+                      <span className="text-[#45edf2] font-bold">▶</span>
                       <span>
                         {simStep === 0 && 'Ready. Select an incident or launch a simulated attack to trace the threat path across all 5 security layers.'}
                         {simStep === 1 && `[Step 1: Initial Infiltration] Identity '${formatIdentity(hopIdentity)}' authenticated via session '${sessionSlot1}'. Flag: Inactive account woken up from suspicious location.`}
@@ -1263,7 +1263,7 @@ export default function App() {
                 </div>
 
                 {/* SVG Graph Canvas - Fitted 100% to box matching reference architecture with arrow simulation */}
-                <div className="relative w-full bg-[#020618] border border-[#10192b] rounded-2xl p-4 flex items-center justify-center shadow-inner overflow-hidden">
+                <div className="relative w-full bg-gradient-to-b from-[#0e1625] via-black to-[#0e1625] border border-[#49299a]/50 rounded-2xl p-4 flex items-center justify-center shadow-[0_0_35px_rgba(73,41,154,0.22)] overflow-hidden">
                   <svg
                     viewBox="0 0 1180 490"
                     className="w-full h-auto min-h-[460px] max-h-[620px]"
@@ -1281,9 +1281,22 @@ export default function App() {
                         }
                       `}</style>
 
+                      {/* Engine Theme Gradient Defs: #0e1625, #49299a, #45edf2, #e8e8fc */}
+                      <linearGradient id="enginePurpleCyan" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#49299a" />
+                        <stop offset="70%" stopColor="#45edf2" />
+                        <stop offset="100%" stopColor="#e8e8fc" />
+                      </linearGradient>
+
+                      <radialGradient id="engineCanvasGlow" cx="50%" cy="50%" r="65%">
+                        <stop offset="0%" stopColor="#49299a" stopOpacity="0.22" />
+                        <stop offset="50%" stopColor="#0e1625" stopOpacity="0.4" />
+                        <stop offset="100%" stopColor="#000000" stopOpacity="0.95" />
+                      </radialGradient>
+
                       {/* Inactive Muted Arrow Marker */}
                       <marker id="arrow-dim-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                        <path d="M 0 1 L 9 5 L 0 9 z" fill="#7f1d1d" opacity="0.6" />
+                        <path d="M 0 1 L 9 5 L 0 9 z" fill="#49299a" opacity="0.6" />
                       </marker>
 
                       {/* Active Highlighted Glowing Red Arrow Marker */}
@@ -1291,9 +1304,9 @@ export default function App() {
                         <path d="M 0 1 L 9 5 L 0 9 z" fill="#ff2255" />
                       </marker>
 
-                      {/* Benign Background Edge Arrow Marker */}
-                      <marker id="arrow-teal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-                        <path d="M 0 1 L 9 5 L 0 9 z" fill="#0d9488" opacity="0.5" />
+                      {/* Benign Background Edge Arrow Marker (Electric Cyan) */}
+                      <marker id="arrow-cyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                        <path d="M 0 1 L 9 5 L 0 9 z" fill="#45edf2" opacity="0.9" />
                       </marker>
 
                       {/* Glow Filters */}
@@ -1305,16 +1318,16 @@ export default function App() {
                         </feMerge>
                       </filter>
 
-                      <filter id="glow-indigo" x="-20%" y="-20%" width="140%" height="140%">
-                        <feGaussianBlur stdDeviation="3" result="blur" />
+                      <filter id="glow-purple" x="-20%" y="-20%" width="140%" height="140%">
+                        <feGaussianBlur stdDeviation="3.5" result="blur" />
                         <feMerge>
                           <feMergeNode in="blur" />
                           <feMergeNode in="SourceGraphic" />
                         </feMerge>
                       </filter>
 
-                      <filter id="glow-amber" x="-20%" y="-20%" width="140%" height="140%">
-                        <feGaussianBlur stdDeviation="3" result="blur" />
+                      <filter id="glow-cyan" x="-20%" y="-20%" width="140%" height="140%">
+                        <feGaussianBlur stdDeviation="3.5" result="blur" />
                         <feMerge>
                           <feMergeNode in="blur" />
                           <feMergeNode in="SourceGraphic" />
@@ -1322,30 +1335,33 @@ export default function App() {
                       </filter>
                     </defs>
 
-                    {/* Column Lane Guides & Headers */}
-                    <line x1="137" y1="35" x2="137" y2="465" stroke="#0e172a" strokeWidth="1" strokeDasharray="3 3" />
-                    <line x1="367" y1="35" x2="367" y2="465" stroke="#0e172a" strokeWidth="1" strokeDasharray="3 3" />
-                    <line x1="607" y1="35" x2="607" y2="465" stroke="#0e172a" strokeWidth="1" strokeDasharray="3 3" />
-                    <line x1="827" y1="35" x2="827" y2="465" stroke="#0e172a" strokeWidth="1" strokeDasharray="3 3" />
-                    <line x1="1042" y1="35" x2="1042" y2="465" stroke="#0e172a" strokeWidth="1" strokeDasharray="3 3" />
+                    {/* Canvas Ambient Glow Background */}
+                    <rect width="1180" height="490" fill="url(#engineCanvasGlow)" rx="16" />
 
-                    <text x="137" y="22" fill="#475569" fontSize="10" fontWeight="700" fontFamily="monospace" textAnchor="middle" letterSpacing="1">IDENTITY PRINCIPALS</text>
-                    <text x="367" y="22" fill="#475569" fontSize="10" fontWeight="700" fontFamily="monospace" textAnchor="middle" letterSpacing="1">ACTIVE SESSIONS</text>
-                    <text x="607" y="22" fill="#475569" fontSize="10" fontWeight="700" fontFamily="monospace" textAnchor="middle" letterSpacing="1">CLOUD ROLES &amp; STS</text>
-                    <text x="827" y="22" fill="#475569" fontSize="10" fontWeight="700" fontFamily="monospace" textAnchor="middle" letterSpacing="1">IAM POLICIES</text>
-                    <text x="1042" y="22" fill="#475569" fontSize="10" fontWeight="700" fontFamily="monospace" textAnchor="middle" letterSpacing="1">SENSITIVE RESOURCES</text>
+                    {/* Column Lane Guides & Headers */}
+                    <line x1="137" y1="35" x2="137" y2="465" stroke="#49299a" strokeOpacity="0.35" strokeWidth="1" strokeDasharray="3 3" />
+                    <line x1="367" y1="35" x2="367" y2="465" stroke="#49299a" strokeOpacity="0.35" strokeWidth="1" strokeDasharray="3 3" />
+                    <line x1="607" y1="35" x2="607" y2="465" stroke="#49299a" strokeOpacity="0.35" strokeWidth="1" strokeDasharray="3 3" />
+                    <line x1="827" y1="35" x2="827" y2="465" stroke="#49299a" strokeOpacity="0.35" strokeWidth="1" strokeDasharray="3 3" />
+                    <line x1="1042" y1="35" x2="1042" y2="465" stroke="#49299a" strokeOpacity="0.35" strokeWidth="1" strokeDasharray="3 3" />
+
+                    <text x="137" y="22" fill="#e8e8fc" fillOpacity="0.75" fontSize="10" fontWeight="700" fontFamily="monospace" textAnchor="middle" letterSpacing="1">IDENTITY PRINCIPALS</text>
+                    <text x="367" y="22" fill="#e8e8fc" fillOpacity="0.75" fontSize="10" fontWeight="700" fontFamily="monospace" textAnchor="middle" letterSpacing="1">ACTIVE SESSIONS</text>
+                    <text x="607" y="22" fill="#e8e8fc" fillOpacity="0.75" fontSize="10" fontWeight="700" fontFamily="monospace" textAnchor="middle" letterSpacing="1">CLOUD ROLES &amp; STS</text>
+                    <text x="827" y="22" fill="#e8e8fc" fillOpacity="0.75" fontSize="10" fontWeight="700" fontFamily="monospace" textAnchor="middle" letterSpacing="1">IAM POLICIES</text>
+                    <text x="1042" y="22" fill="#e8e8fc" fillOpacity="0.75" fontSize="10" fontWeight="700" fontFamily="monospace" textAnchor="middle" letterSpacing="1">SENSITIVE RESOURCES</text>
 
                     {/* ========================================================
-                        BACKGROUND EDGES (Benign Telemetry Curves)
+                        BACKGROUND EDGES (Benign Telemetry Purple-Cyan Gradient)
                        ======================================================== */}
                     {/* Identity Slot 1 (Alice) -> Session Slot 2 */}
-                    <path d="M 220 154 L 285 154" fill="none" stroke="#0d9488" strokeWidth="1.4" opacity="0.4" markerEnd="url(#arrow-teal)" />
+                    <path d="M 220 154 L 285 154" fill="none" stroke="url(#enginePurpleCyan)" strokeWidth="1.6" opacity="0.75" markerEnd="url(#arrow-cyan)" />
                     {/* Session Slot 2 -> sts.amazonaws.com */}
-                    <path d="M 450 154 C 485 154, 485 238, 520 238" fill="none" stroke="#0d9488" strokeWidth="1.4" opacity="0.4" markerEnd="url(#arrow-teal)" />
+                    <path d="M 450 154 C 485 154, 485 238, 520 238" fill="none" stroke="url(#enginePurpleCyan)" strokeWidth="1.6" opacity="0.75" markerEnd="url(#arrow-cyan)" />
                     {/* sts.amazonaws.com -> Resource Slot 1 (corp-analytics-reports) */}
-                    <path d="M 695 238 C 785 238, 865 169, 955 169" fill="none" stroke="#0d9488" strokeWidth="1.4" opacity="0.4" markerEnd="url(#arrow-teal)" />
+                    <path d="M 695 238 C 785 238, 865 169, 955 169" fill="none" stroke="url(#enginePurpleCyan)" strokeWidth="1.6" opacity="0.75" markerEnd="url(#arrow-cyan)" />
                     {/* sts.amazonaws.com -> Resource Slot 3 (corp-dev-builds) */}
-                    <path d="M 695 260 C 785 260, 865 331, 955 331" fill="none" stroke="#0d9488" strokeWidth="1.4" opacity="0.4" markerEnd="url(#arrow-teal)" />
+                    <path d="M 695 260 C 785 260, 865 331, 955 331" fill="none" stroke="url(#enginePurpleCyan)" strokeWidth="1.6" opacity="0.75" markerEnd="url(#arrow-cyan)" />
 
                     {/* ========================================================
                         ACTIVE ATTACK PATH ARROWS (Highlighted Step-by-Step)
@@ -1354,7 +1370,7 @@ export default function App() {
                     <path
                       d="M 220 206 C 255 206, 255 90, 285 90"
                       fill="none"
-                      stroke={simStep >= 1 ? '#ff2255' : '#7f1d1d'}
+                      stroke={simStep >= 1 ? '#ff2255' : '#49299a'}
                       strokeWidth={simStep >= 1 ? '3.5' : '1.8'}
                       strokeDasharray={simStep >= 1 ? '8 4' : '5 3'}
                       markerEnd={simStep >= 1 ? 'url(#arrow-bright-red)' : 'url(#arrow-dim-red)'}
@@ -1367,7 +1383,7 @@ export default function App() {
                     <path
                       d="M 450 90 C 490 90, 485 230, 520 230"
                       fill="none"
-                      stroke={simStep >= 2 ? '#ff2255' : '#7f1d1d'}
+                      stroke={simStep >= 2 ? '#ff2255' : '#49299a'}
                       strokeWidth={simStep >= 2 ? '3.5' : '1.8'}
                       strokeDasharray={simStep >= 2 ? '8 4' : '5 3'}
                       markerEnd={simStep >= 2 ? 'url(#arrow-bright-red)' : 'url(#arrow-dim-red)'}
@@ -1380,7 +1396,7 @@ export default function App() {
                     <path
                       d="M 220 218 L 285 218"
                       fill="none"
-                      stroke={simStep >= 2 ? '#ff4d4d' : '#450a0a'}
+                      stroke={simStep >= 2 ? '#ff4d4d' : '#49299a'}
                       strokeWidth={simStep >= 2 ? '2.6' : '1.3'}
                       strokeDasharray="6 3"
                       markerEnd={simStep >= 2 ? 'url(#arrow-bright-red)' : 'url(#arrow-dim-red)'}
@@ -1392,7 +1408,7 @@ export default function App() {
                     <path
                       d="M 220 226 C 255 226, 255 346, 285 346"
                       fill="none"
-                      stroke={simStep >= 2 ? '#ff4d4d' : '#450a0a'}
+                      stroke={simStep >= 2 ? '#ff4d4d' : '#49299a'}
                       strokeWidth={simStep >= 2 ? '2.2' : '1.3'}
                       strokeDasharray="5 3"
                       markerEnd={simStep >= 2 ? 'url(#arrow-bright-red)' : 'url(#arrow-dim-red)'}
@@ -1402,7 +1418,7 @@ export default function App() {
                     <path
                       d="M 220 230 C 255 230, 255 410, 285 410"
                       fill="none"
-                      stroke={simStep >= 2 ? '#ff4d4d' : '#450a0a'}
+                      stroke={simStep >= 2 ? '#ff4d4d' : '#49299a'}
                       strokeWidth={simStep >= 2 ? '2.2' : '1.3'}
                       strokeDasharray="5 3"
                       markerEnd={simStep >= 2 ? 'url(#arrow-bright-red)' : 'url(#arrow-dim-red)'}
@@ -1414,7 +1430,7 @@ export default function App() {
                     <path
                       d="M 695 250 L 740 250"
                       fill="none"
-                      stroke={simStep >= 3 ? '#ff2255' : '#7f1d1d'}
+                      stroke={simStep >= 3 ? '#ff2255' : '#49299a'}
                       strokeWidth={simStep >= 3 ? '3.5' : '1.8'}
                       strokeDasharray={simStep >= 3 ? '8 4' : '5 3'}
                       markerEnd={simStep >= 3 ? 'url(#arrow-bright-red)' : 'url(#arrow-dim-red)'}
@@ -1427,7 +1443,7 @@ export default function App() {
                     <path
                       d="M 915 250 L 955 250"
                       fill="none"
-                      stroke={simStep >= 4 ? '#ff1744' : '#7f1d1d'}
+                      stroke={simStep >= 4 ? '#ff1744' : '#49299a'}
                       strokeWidth={simStep >= 4 ? '3.8' : '1.8'}
                       strokeDasharray={simStep >= 4 ? '8 4' : '5 3'}
                       markerEnd={simStep >= 4 ? 'url(#arrow-bright-red)' : 'url(#arrow-dim-red)'}
@@ -1454,11 +1470,11 @@ export default function App() {
                       })}
                       onMouseLeave={() => setActiveBubble(null)}
                     >
-                      <rect width="165" height="48" rx="8" fill="#09101d" stroke="#1b283d" strokeWidth="1" className="group-hover:stroke-cyan-500/50 transition-all" />
-                      <text x="14" y="21" fill="#cbd5e1" fontSize="12" fontWeight="bold" fontFamily="monospace">
+                      <rect width="165" height="48" rx="8" fill="#0e1625" stroke="#49299a" strokeOpacity="0.45" strokeWidth="1.2" className="group-hover:stroke-[#45edf2] transition-all" />
+                      <text x="14" y="21" fill="#e8e8fc" fontSize="12" fontWeight="bold" fontFamily="monospace">
                         {formatIdentity(identitySlot1).slice(0, 18)}
                       </text>
-                      <text x="14" y="36" fill="#64748b" fontSize="9.5" fontWeight="600" fontFamily="monospace">IDENTITY • NORMAL</text>
+                      <text x="14" y="36" fill="#45edf2" fillOpacity="0.8" fontSize="9.5" fontWeight="600" fontFamily="monospace">IDENTITY • NORMAL</text>
                     </g>
 
                     {/* 1.2: Active Attacker Identity Slot 2 (Bob) */}
@@ -1485,16 +1501,16 @@ export default function App() {
                         width="165"
                         height="52"
                         rx="8"
-                        fill="#121936"
-                        stroke={simStep >= 1 ? '#ff2255' : '#6366f1'}
+                        fill="#0e1625"
+                        stroke={simStep >= 1 ? '#ff2255' : '#49299a'}
                         strokeWidth={simStep >= 1 ? '2.6' : '2'}
-                        filter={simStep >= 1 ? 'url(#glow-arrow-red)' : 'url(#glow-indigo)'}
+                        filter={simStep >= 1 ? 'url(#glow-arrow-red)' : 'url(#glow-purple)'}
                         className="transition-all"
                       />
                       <text x="14" y="22" fill="#ffffff" fontSize="12" fontWeight="bold" fontFamily="monospace">
                         {formatIdentity(hopIdentity).slice(0, 18)}
                       </text>
-                      <text x="14" y="38" fill={simStep >= 1 ? '#fca5a5' : '#818cf8'} fontSize="9.5" fontWeight="bold" fontFamily="monospace">
+                      <text x="14" y="38" fill={simStep >= 1 ? '#fca5a5' : '#45edf2'} fontSize="9.5" fontWeight="bold" fontFamily="monospace">
                         IDENTITY • {simStep >= 1 ? 'COMPROMISED' : 'NORMAL'}
                       </text>
                     </g>
@@ -1514,11 +1530,11 @@ export default function App() {
                       })}
                       onMouseLeave={() => setActiveBubble(null)}
                     >
-                      <rect width="165" height="48" rx="8" fill="#09101d" stroke="#1b283d" strokeWidth="1" className="group-hover:stroke-cyan-500/50 transition-all" />
-                      <text x="14" y="21" fill="#cbd5e1" fontSize="12" fontWeight="bold" fontFamily="monospace">
+                      <rect width="165" height="48" rx="8" fill="#0e1625" stroke="#49299a" strokeOpacity="0.45" strokeWidth="1.2" className="group-hover:stroke-[#45edf2] transition-all" />
+                      <text x="14" y="21" fill="#e8e8fc" fontSize="12" fontWeight="bold" fontFamily="monospace">
                         {formatIdentity(identitySlot3).slice(0, 18)}
                       </text>
-                      <text x="14" y="36" fill="#64748b" fontSize="9.5" fontWeight="600" fontFamily="monospace">IDENTITY • NORMAL</text>
+                      <text x="14" y="36" fill="#45edf2" fillOpacity="0.8" fontSize="9.5" fontWeight="600" fontFamily="monospace">IDENTITY • NORMAL</text>
                     </g>
 
                     {/* 1.4: Identity Slot 4 (Diana - Admin / Protected) */}
@@ -1536,7 +1552,7 @@ export default function App() {
                       })}
                       onMouseLeave={() => setActiveBubble(null)}
                     >
-                      <rect width="165" height="48" rx="8" fill="#18090d" stroke="#881337" strokeWidth="1.6" className="group-hover:stroke-rose-500 transition-all" />
+                      <rect width="165" height="48" rx="8" fill="#140a14" stroke="#881337" strokeWidth="1.6" className="group-hover:stroke-rose-500 transition-all" />
                       <text x="14" y="21" fill="#fecdd3" fontSize="12" fontWeight="bold" fontFamily="monospace">
                         {formatIdentity(identitySlot4).slice(0, 18)}
                       </text>
@@ -1565,67 +1581,67 @@ export default function App() {
                         width="165"
                         height="44"
                         rx="8"
-                        fill="#0c1524"
-                        stroke={simStep >= 2 ? '#ff2255' : '#1e293b'}
-                        strokeWidth={simStep >= 2 ? '2.4' : '1'}
-                        filter={simStep >= 2 ? 'url(#glow-arrow-red)' : undefined}
+                        fill="#0e1625"
+                        stroke={simStep >= 2 ? '#ff2255' : '#45edf2'}
+                        strokeWidth={simStep >= 2 ? '2.4' : '1.5'}
+                        filter={simStep >= 2 ? 'url(#glow-arrow-red)' : 'url(#glow-cyan)'}
                         className="transition-all"
                       />
-                      <text x="14" y="19" fill="#ffffff" fontSize="12" fontWeight="bold" fontFamily="monospace">
+                      <text x="14" y="19" fill="#e8e8fc" fontSize="12" fontWeight="bold" fontFamily="monospace">
                         Session: {sessionSlot1.slice(0, 8)}..
                       </text>
-                      <text x="14" y="33" fill={simStep >= 2 ? '#fca5a5' : '#64748b'} fontSize="9" fontWeight="bold" fontFamily="monospace">
+                      <text x="14" y="33" fill={simStep >= 2 ? '#fca5a5' : '#45edf2'} fontSize="9" fontWeight="bold" fontFamily="monospace">
                         SESSION • {simStep >= 2 ? 'HIJACKED' : 'NORMAL'}
                       </text>
                     </g>
 
                     {/* 2.2: Session Slot 2 (Aligned with Alice) */}
                     <g transform="translate(285, 132)" className="cursor-pointer group">
-                      <rect width="165" height="44" rx="8" fill="#080e18" stroke="#162032" strokeWidth="1" />
-                      <text x="14" y="19" fill="#94a3b8" fontSize="12" fontWeight="bold" fontFamily="monospace">
+                      <rect width="165" height="44" rx="8" fill="#0e1625" stroke="#1d2d48" strokeWidth="1" className="group-hover:stroke-[#45edf2] transition-all" />
+                      <text x="14" y="19" fill="#e8e8fc" fillOpacity="0.85" fontSize="12" fontWeight="bold" fontFamily="monospace">
                         Session: {sessionSlot2.slice(0, 8)}..
                       </text>
-                      <text x="14" y="33" fill="#475569" fontSize="9" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
+                      <text x="14" y="33" fill="#45edf2" fillOpacity="0.75" fontSize="9" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
                     </g>
 
                     {/* 2.3: Session Slot 3 (Aligned with Bob) */}
                     <g transform="translate(285, 196)" className="cursor-pointer group">
-                      <rect width="165" height="44" rx="8" fill="#080e18" stroke={simStep >= 2 ? '#f43f5e' : '#162032'} strokeWidth="1" />
-                      <text x="14" y="19" fill="#94a3b8" fontSize="12" fontWeight="bold" fontFamily="monospace">
+                      <rect width="165" height="44" rx="8" fill="#0e1625" stroke={simStep >= 2 ? '#ff4d4d' : '#1d2d48'} strokeWidth="1" className="group-hover:stroke-[#45edf2] transition-all" />
+                      <text x="14" y="19" fill="#e8e8fc" fillOpacity="0.85" fontSize="12" fontWeight="bold" fontFamily="monospace">
                         Session: {sessionSlot3.slice(0, 8)}..
                       </text>
-                      <text x="14" y="33" fill="#475569" fontSize="9" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
+                      <text x="14" y="33" fill="#45edf2" fillOpacity="0.75" fontSize="9" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
                     </g>
 
                     {/* 2.4: Session Slot 4 (Aligned with Charlie) */}
                     <g transform="translate(285, 260)" className="cursor-pointer group">
-                      <rect width="165" height="44" rx="8" fill="#080e18" stroke="#162032" strokeWidth="1" />
-                      <text x="14" y="19" fill="#94a3b8" fontSize="12" fontWeight="bold" fontFamily="monospace">
+                      <rect width="165" height="44" rx="8" fill="#0e1625" stroke="#1d2d48" strokeWidth="1" className="group-hover:stroke-[#45edf2] transition-all" />
+                      <text x="14" y="19" fill="#e8e8fc" fillOpacity="0.85" fontSize="12" fontWeight="bold" fontFamily="monospace">
                         Session: {sessionSlot4.slice(0, 8)}..
                       </text>
-                      <text x="14" y="33" fill="#475569" fontSize="9" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
+                      <text x="14" y="33" fill="#45edf2" fillOpacity="0.75" fontSize="9" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
                     </g>
 
                     {/* 2.5: Session Slot 5 (Aligned with Diana) */}
                     <g transform="translate(285, 324)" className="cursor-pointer group">
-                      <rect width="165" height="44" rx="8" fill="#080e18" stroke="#162032" strokeWidth="1" />
-                      <text x="14" y="19" fill="#94a3b8" fontSize="12" fontWeight="bold" fontFamily="monospace">
+                      <rect width="165" height="44" rx="8" fill="#0e1625" stroke="#1d2d48" strokeWidth="1" className="group-hover:stroke-[#45edf2] transition-all" />
+                      <text x="14" y="19" fill="#e8e8fc" fillOpacity="0.85" fontSize="12" fontWeight="bold" fontFamily="monospace">
                         Session: {sessionSlot5.slice(0, 8)}..
                       </text>
-                      <text x="14" y="33" fill="#475569" fontSize="9" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
+                      <text x="14" y="33" fill="#45edf2" fillOpacity="0.75" fontSize="9" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
                     </g>
 
                     {/* 2.6: Session Slot 6 */}
                     <g transform="translate(285, 388)" className="cursor-pointer group">
-                      <rect width="165" height="44" rx="8" fill="#080e18" stroke="#162032" strokeWidth="1" />
-                      <text x="14" y="19" fill="#94a3b8" fontSize="12" fontWeight="bold" fontFamily="monospace">
+                      <rect width="165" height="44" rx="8" fill="#0e1625" stroke="#1d2d48" strokeWidth="1" className="group-hover:stroke-[#45edf2] transition-all" />
+                      <text x="14" y="19" fill="#e8e8fc" fillOpacity="0.85" fontSize="12" fontWeight="bold" fontFamily="monospace">
                         Session: {sessionSlot6.slice(0, 8)}..
                       </text>
-                      <text x="14" y="33" fill="#475569" fontSize="9" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
+                      <text x="14" y="33" fill="#45edf2" fillOpacity="0.75" fontSize="9" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
                     </g>
 
                     {/* ========================================================
-                        COLUMN 3: ROLES & STS (Center Node)
+                        COLUMN 3: ROLES & STS (Center Node - Royal Purple)
                        ======================================================== */}
                     <g
                       transform="translate(520, 222)"
@@ -1651,22 +1667,22 @@ export default function App() {
                         width="175"
                         height="56"
                         rx="8"
-                        fill="#3d1703"
-                        stroke={simStep >= 3 ? '#fbbf24' : '#ea580c'}
-                        strokeWidth={simStep >= 3 ? '2.6' : '2'}
-                        filter={simStep >= 3 ? 'url(#glow-amber)' : undefined}
+                        fill="#180f33"
+                        stroke={simStep >= 3 ? '#45edf2' : '#49299a'}
+                        strokeWidth={simStep >= 3 ? '2.8' : '2'}
+                        filter={simStep >= 3 ? 'url(#glow-cyan)' : 'url(#glow-purple)'}
                         className="transition-all"
                       />
                       <text x="14" y="24" fill="#ffffff" fontSize="12.5" fontWeight="bold" fontFamily="monospace">
                         {hopRole.slice(0, 18)}
                       </text>
-                      <text x="14" y="42" fill="#fb923c" fontSize="9.5" fontWeight="bold" fontFamily="monospace">
+                      <text x="14" y="42" fill="#45edf2" fontSize="9.5" fontWeight="bold" fontFamily="monospace">
                         ROLE • MEDIUM
                       </text>
                     </g>
 
                     {/* ========================================================
-                        COLUMN 4: POLICIES (IAM Policies)
+                        COLUMN 4: POLICIES (IAM Policies - Obsidian Cyan)
                        ======================================================== */}
                     <g
                       transform="translate(740, 222)"
@@ -1691,15 +1707,16 @@ export default function App() {
                         width="175"
                         height="56"
                         rx="8"
-                        fill="#0a1526"
-                        stroke={simStep >= 4 ? '#38bdf8' : '#0284c7'}
+                        fill="#0e1625"
+                        stroke={simStep >= 4 ? '#e8e8fc' : '#45edf2'}
                         strokeWidth={simStep >= 4 ? '2.4' : '1.8'}
+                        filter={simStep >= 4 ? 'url(#glow-cyan)' : undefined}
                         className="transition-all"
                       />
                       <text x="14" y="24" fill="#ffffff" fontSize="12.5" fontWeight="bold" fontFamily="monospace">
                         {hopPolicy.replace('arn:aws:iam::aws:policy/', '').slice(0, 18)}
                       </text>
-                      <text x="14" y="42" fill="#38bdf8" fontSize="9.5" fontWeight="bold" fontFamily="monospace">
+                      <text x="14" y="42" fill="#45edf2" fontSize="9.5" fontWeight="bold" fontFamily="monospace">
                         POLICY • MEDIUM
                       </text>
                     </g>
@@ -1709,11 +1726,11 @@ export default function App() {
                        ======================================================== */}
                     {/* 5.1: Resource Slot 1 */}
                     <g transform="translate(955, 145)" className="cursor-pointer group">
-                      <rect width="175" height="48" rx="8" fill="#051914" stroke="#0d9488" strokeWidth="1" />
-                      <text x="14" y="21" fill="#cbd5e1" fontSize="12" fontWeight="bold" fontFamily="monospace">
+                      <rect width="175" height="48" rx="8" fill="#0e1625" stroke="#45edf2" strokeOpacity="0.45" strokeWidth="1" className="group-hover:stroke-[#45edf2] transition-all" />
+                      <text x="14" y="21" fill="#e8e8fc" fontSize="12" fontWeight="bold" fontFamily="monospace">
                         {resourceSlot1.slice(0, 18)}
                       </text>
-                      <text x="14" y="36" fill="#34d399" fontSize="9.5" fontWeight="600" fontFamily="monospace">RESOURCE • NORMAL</text>
+                      <text x="14" y="36" fill="#45edf2" fillOpacity="0.85" fontSize="9.5" fontWeight="600" fontFamily="monospace">RESOURCE • NORMAL</text>
                     </g>
 
                     {/* 5.2: Exfiltration Target Resource Slot 2 (Critical Vault - Bright Red) */}
@@ -1740,7 +1757,7 @@ export default function App() {
                         width="175"
                         height="56"
                         rx="8"
-                        fill="#3d0709"
+                        fill="#290918"
                         stroke={simStep >= 5 ? '#ff1744' : '#ef4444'}
                         strokeWidth={simStep >= 5 ? '2.8' : '2'}
                         filter={simStep >= 5 ? 'url(#glow-arrow-red)' : undefined}
@@ -1756,18 +1773,18 @@ export default function App() {
 
                     {/* 5.3: Resource Slot 3 */}
                     <g transform="translate(955, 307)" className="cursor-pointer group">
-                      <rect width="175" height="48" rx="8" fill="#051914" stroke="#0d9488" strokeWidth="1" />
-                      <text x="14" y="21" fill="#cbd5e1" fontSize="12" fontWeight="bold" fontFamily="monospace">
+                      <rect width="175" height="48" rx="8" fill="#0e1625" stroke="#45edf2" strokeOpacity="0.45" strokeWidth="1" className="group-hover:stroke-[#45edf2] transition-all" />
+                      <text x="14" y="21" fill="#e8e8fc" fontSize="12" fontWeight="bold" fontFamily="monospace">
                         {resourceSlot3.slice(0, 18)}
                       </text>
-                      <text x="14" y="36" fill="#34d399" fontSize="9.5" fontWeight="600" fontFamily="monospace">RESOURCE • NORMAL</text>
+                      <text x="14" y="36" fill="#45edf2" fillOpacity="0.85" fontSize="9.5" fontWeight="600" fontFamily="monospace">RESOURCE • NORMAL</text>
                     </g>
 
                     {/* Zero Trust Containment Shield Overlay when Step 6 reached */}
                     {simStep >= 6 && (
                       <g transform="translate(440, 14)">
-                        <rect x="0" y="0" width="300" height="30" rx="8" fill="#03180f" stroke="#10b981" strokeWidth="2" />
-                        <text x="150" y="19" fill="#34d399" fontSize="11" fontWeight="bold" fontFamily="monospace" textAnchor="middle">
+                        <rect x="0" y="0" width="300" height="30" rx="8" fill="#0e1625" stroke="#45edf2" strokeWidth="2" filter="url(#glow-cyan)" />
+                        <text x="150" y="19" fill="#e8e8fc" fontSize="11" fontWeight="bold" fontFamily="monospace" textAnchor="middle">
                           🛡️ ZERO TRUST REVOCATION ENFORCED
                         </text>
                       </g>
@@ -1899,7 +1916,7 @@ export default function App() {
 
                         <div className="w-full bg-[#121218] h-2 rounded-full overflow-hidden border border-[#1c1c28]">
                           <div
-                            className="bg-gradient-to-r from-sky-400 via-cyan-400 to-teal-400 h-full rounded-full transition-all duration-500"
+                            className="bg-gradient-to-r from-[#49299a] via-[#35267d] to-[#45edf2] h-full rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(69,237,242,0.3)]"
                             style={{ width: `${Math.min(100, weight * 200)}%` }}
                           ></div>
                         </div>
