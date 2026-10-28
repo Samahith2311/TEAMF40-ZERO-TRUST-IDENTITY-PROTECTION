@@ -1,0 +1,52 @@
+[
+  {
+    "identity_key": "alice@corp.internal",
+    "roles": ["developer"],
+    "clearance_level": 2,
+    "peer_group": "engineering",
+    "mfa_enforced": true,
+    "last_active_ts": "2026-10-27T18:00:00Z",
+    "p95_gap_days": 2.5,
+    "is_protected": false
+  },
+  {
+    "identity_key": "bob.contractor@corp.internal",
+    "roles": ["contractor", "analyst"],
+    "clearance_level": 1,
+    "peer_group": "external_contractors",
+    "mfa_enforced": false,
+    "last_active_ts": "2026-08-15T09:00:00Z",
+    "p95_gap_days": 12.0,
+    "is_protected": false
+  },
+  {
+    "identity_key": "charlie.analyst@corp.internal",
+    "roles": ["analyst"],
+    "clearance_level": 2,
+    "peer_group": "business_intelligence",
+    "mfa_enforced": true,
+    "last_active_ts": "2026-10-28T08:00:00Z",
+    "p95_gap_days": 3.0,
+    "is_protected": false
+  },
+  {
+    "identity_key": "diana.admin@corp.internal",
+    "roles": ["admin"],
+    "clearance_level": 4,
+    "peer_group": "cloud_infrastructure",
+    "mfa_enforced": true,
+    "last_active_ts": "2026-10-28T09:30:00Z",
+    "p95_gap_days": 1.0,
+    "is_protected": false
+  },
+  {
+    "identity_key": "breakglass-admin@corp.internal",
+    "roles": ["superadmin", "breakglass"],
+    "clearance_level": 5,
+    "peer_group": "security_infrastructure",
+    "mfa_enforced": true,
+    "last_active_ts": "2026-09-01T00:00:00Z",
+    "p95_gap_days": 45.0,
+    "is_protected": true
+  }
+]

@@ -1,1 +1,16 @@
 .goat
+node_modules/
+web/node_modules/
+dist/
+web/dist/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+.env
+.venv/
+env/
+venv/
+*.log

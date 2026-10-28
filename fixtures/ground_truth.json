@@ -1,0 +1,36 @@
+{
+  "events": {
+    "okta-evt-001": "BENIGN",
+    "okta-evt-002": "DORMANT_REACTIVATION",
+    "okta-evt-003": "IMPOSSIBLE_TRAVEL",
+    "ct-evt-001": "BENIGN",
+    "ct-evt-002": "TOKEN_ABUSE",
+    "ct-evt-003": "PRIVILEGE_ESCALATION",
+    "ct-evt-004": "UNUSUAL_API_CALLS",
+    "okta-evt-004": "BENIGN",
+    "ct-evt-005": "BENIGN",
+    "okta-evt-005": "BENIGN",
+    "ct-evt-006": "BENIGN"
+  },
+  "identities": {
+    "alice@corp.internal": "BENIGN",
+    "bob.contractor@corp.internal": "COMPROMISED",
+    "charlie.analyst@corp.internal": "BENIGN",
+    "diana.admin@corp.internal": "BENIGN",
+    "eve.attacker@corp.internal": "COMPROMISED"
+  },
+  "sessions": {
+    "sess-okta-alice-101": "BENIGN",
+    "sess-okta-bob-202": "COMPROMISED",
+    "sess-okta-bob-203": "COMPROMISED",
+    "bob-session-1": "COMPROMISED",
+    "sess-charlie-301": "BENIGN"
+  },
+  "chains": [
+    {
+      "incident_id": "inc-bob_contractor_corp_internal",
+      "subject": "bob.contractor@corp.internal",
+      "expected_stages": ["INITIAL_AUTHENTICATION", "SESSION_ASSUMPTION", "PRIVILEGE_ESCALATION", "DATA_EXFILTRATION_ATTEMPT"]
+    }
+  ]
+}

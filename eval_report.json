@@ -1,0 +1,203 @@
+{
+  "event_level": {
+    "ours": {
+      "tp": 5,
+      "fp": 0,
+      "fn": 0,
+      "tn": 2,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "fpr": 0.0
+    },
+    "baseline": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 4,
+      "tn": 2,
+      "precision": 1.0,
+      "recall": 0.2,
+      "f1": 0.3333,
+      "fpr": 0.0
+    },
+    "delta": {
+      "precision": 0.0,
+      "recall": 0.8,
+      "f1": 0.6667,
+      "fpr": 0.0
+    },
+    "denominator_note": "FPR denominator = actual benign events (FP + TN)"
+  },
+  "per_detector": {
+    "dormant": {
+      "tp": 3,
+      "fp": 0,
+      "fn": 2,
+      "tn": 2,
+      "precision": 1.0,
+      "recall": 0.6,
+      "f1": 0.75,
+      "fpr": 0.0
+    },
+    "token_abuse": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 5,
+      "tn": 2,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "fpr": 0.0
+    },
+    "priv_escalation": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 4,
+      "tn": 2,
+      "precision": 1.0,
+      "recall": 0.2,
+      "f1": 0.3333,
+      "fpr": 0.0
+    },
+    "unusual_api": {
+      "tp": 3,
+      "fp": 0,
+      "fn": 2,
+      "tn": 2,
+      "precision": 1.0,
+      "recall": 0.6,
+      "f1": 0.75,
+      "fpr": 0.0
+    },
+    "impossible_travel": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 5,
+      "tn": 2,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "fpr": 0.0
+    }
+  },
+  "identity_level": {
+    "ours": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 1,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "fpr": 0.0
+    },
+    "baseline": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 1,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "fpr": 0.0
+    },
+    "delta": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "fpr": 0.0
+    }
+  },
+  "session_level": {
+    "ours": {
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "tn": 1,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "fpr": 0.0
+    },
+    "baseline": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 3,
+      "tn": 1,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "fpr": 0.0
+    },
+    "delta": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "fpr": 0.0
+    }
+  },
+  "chain_reconstruction": {
+    "recall": 1.0,
+    "expected_count": 1,
+    "reconstructed_count": 1,
+    "details": [
+      {
+        "subject": "bob.contractor@corp.internal",
+        "expected_stages": [
+          "INITIAL_AUTHENTICATION",
+          "SESSION_ASSUMPTION",
+          "PRIVILEGE_ESCALATION",
+          "DATA_EXFILTRATION_ATTEMPT"
+        ],
+        "observed_stages": [
+          "INITIAL_AUTHENTICATION",
+          "SESSION_ASSUMPTION",
+          "INITIAL_AUTHENTICATION",
+          "PRIVILEGE_ESCALATION",
+          "DATA_EXFILTRATION_ATTEMPT"
+        ],
+        "matched_stages": [
+          "INITIAL_AUTHENTICATION",
+          "PRIVILEGE_ESCALATION",
+          "DATA_EXFILTRATION_ATTEMPT",
+          "SESSION_ASSUMPTION"
+        ],
+        "missed_stages": [],
+        "exact_match": false
+      }
+    ]
+  },
+  "chain_recall": 1.0,
+  "evidence_valid_pct": 100.0,
+  "explanation_quality": {
+    "rubric_checklist": {
+      "top3_factor_attribution": "PASS",
+      "signed_factor_weights": "PASS",
+      "counterfactual_explanations": "PASS",
+      "exact_raw_evidence_citations": "PASS"
+    },
+    "rubric_score": 1.0,
+    "traceability_rate": 1.0,
+    "notes": "100% of alerts include signed factor contributions, counterfactual statements, and verifiable raw log references."
+  },
+  "latency": {
+    "per_event_ms": 0.0162,
+    "total_ms": 0.1131,
+    "load_profile": "not published (synthetic replay benchmark)"
+  },
+  "split": {
+    "strategy": "WHOLE_IDENTITY_HOLDOUT",
+    "seed": 42,
+    "train_identities": [
+      "breakglass-admin@corp.internal",
+      "diana.admin@corp.internal",
+      "alice@corp.internal"
+    ],
+    "test_identities": [
+      "charlie.analyst@corp.internal",
+      "bob.contractor@corp.internal"
+    ],
+    "n_test_events": 7
+  },
+  "label": "VERIFIED"
+}
