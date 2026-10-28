@@ -130,6 +130,49 @@ export default function App() {
   const [mtlsResult, setMtlsResult] = useState<any>(null)
   const [mtlsLoading, setMtlsLoading] = useState<boolean>(false)
 
+  // Live Attack Simulation State (Visual step-by-step kill-chain animation)
+  const [simStep, setSimStep] = useState<number>(0) // 0: Idle, 1: Infiltration, 2: Token Abuse, 3: STS Role, 4: PrivEsc, 5: Exfiltration, 6: Revocation
+  const [isSimulating, setIsSimulating] = useState<boolean>(false)
+  const [simSpeed, setSimSpeed] = useState<number>(1400) // ms per step
+  const simTimerRef = useRef<any>(null)
+
+  const startAttackSimulation = () => {
+    if (simTimerRef.current) clearInterval(simTimerRef.current)
+    setSimStep(1)
+    setIsSimulating(true)
+  }
+
+  const stopAttackSimulation = () => {
+    if (simTimerRef.current) clearInterval(simTimerRef.current)
+    setIsSimulating(false)
+  }
+
+  const resetAttackSimulation = () => {
+    if (simTimerRef.current) clearInterval(simTimerRef.current)
+    setIsSimulating(false)
+    setSimStep(0)
+  }
+
+  useEffect(() => {
+    if (isSimulating) {
+      simTimerRef.current = setInterval(() => {
+        setSimStep(prev => {
+          if (prev >= 6) {
+            setIsSimulating(false)
+            if (simTimerRef.current) clearInterval(simTimerRef.current)
+            return 6
+          }
+          return prev + 1
+        })
+      }, simSpeed)
+    } else {
+      if (simTimerRef.current) clearInterval(simTimerRef.current)
+    }
+    return () => {
+      if (simTimerRef.current) clearInterval(simTimerRef.current)
+    }
+  }, [isSimulating, simSpeed])
+
   // Interactive Bubble Inspector Popover State
   const [activeBubble, setActiveBubble] = useState<{
     id: string
@@ -215,8 +258,10 @@ export default function App() {
       .then(res => {
         setGenerating(false)
         if (res.status === 'SUCCESS') {
-          setNotification(`⚡ Threat [${res.attack_type}] generated against ${res.identity_name} • Graph & Weights Synced`)
+          setNotification(`⚡ Threat [${res.attack_type}] generated against ${res.identity_name} • Live Attack Graph Simulating`)
           loadData(true)
+          setActiveTab('graph')
+          startAttackSimulation()
         } else {
           setError(res.detail || 'Failed to generate synthetic attack')
         }
@@ -826,102 +871,319 @@ export default function App() {
             </div>
           )}
 
-          {/* --- TAB 2: LIVE ATTACK GRAPH (Interactive Bubble Network) --- */}
+          {/* --- TAB 2: LIVE ATTACK GRAPH (Interactive Swimlane Kill-Chain DAG) --- */}
           {activeTab === 'graph' && (
-            <div className="space-y-6">
-              <div className="p-6 border border-[#1c1c26] rounded-2xl bg-[#08080c] space-y-4 shadow-sm">
-                <div className="flex items-center justify-between">
+            <div className="space-y-4">
+              <div className="p-5 border border-[#1c1c26] rounded-2xl bg-[#08080c] space-y-4 shadow-sm">
+                {/* Header & Controls */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-2 border-b border-[#161622]">
                   <div>
                     <h2 className="text-base font-bold text-white flex items-center space-x-2">
-                      <span>Interactive Bubble Attack Graph</span>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#061710] text-emerald-300 border border-emerald-800/40 animate-pulse">
-                        LIVE
+                      <span>Live Attack Graph & Kill-Chain DAG</span>
+                      <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${
+                        isSimulating ? 'bg-rose-950 text-rose-300 border border-rose-800/60 animate-pulse' : 'bg-[#061710] text-emerald-300 border border-emerald-800/40'
+                      }`}>
+                        {isSimulating ? '● SIMULATING ATTACK' : 'LIVE TELEMETRY'}
                       </span>
                     </h2>
                     <p className="text-xs text-zinc-400">
-                      Hover over any bubble node to inspect credentials, role escalation, and target vaults
+                      Multi-stage identity privilege graph: Authentication → Token Continuity → STS Role → Policy Escalation → Vault Exfiltration
                     </p>
                   </div>
 
-                  {/* Incident selector */}
-                  <div className="flex items-center space-x-2 text-xs font-mono">
-                    <span className="text-zinc-400">Incident:</span>
-                    <select
-                      value={selectedAlert?.alert_id || ''}
-                      onChange={e => {
-                        const found = alerts.find(a => a.alert_id === e.target.value)
-                        if (found) setSelectedAlert(found)
-                      }}
-                      className="bg-[#101016] border border-[#222230] text-zinc-200 text-xs rounded-lg px-2.5 py-1 font-mono outline-none cursor-pointer"
-                    >
-                      {alerts.map(a => (
-                        <option key={a.alert_id} value={a.alert_id}>
-                          {a.alert_id} ({formatIdentity(a.subject.id)})
-                        </option>
-                      ))}
-                    </select>
+                  <div className="flex items-center space-x-3 text-xs font-mono">
+                    {/* Incident Selector */}
+                    <div className="flex items-center space-x-2">
+                      <span className="text-zinc-400">Incident:</span>
+                      <select
+                        value={selectedAlert?.alert_id || ''}
+                        onChange={e => {
+                          const found = alerts.find(a => a.alert_id === e.target.value)
+                          if (found) {
+                            setSelectedAlert(found)
+                            resetAttackSimulation()
+                          }
+                        }}
+                        className="bg-[#101016] border border-[#222230] text-zinc-200 text-xs rounded-lg px-2.5 py-1.5 font-mono outline-none cursor-pointer"
+                      >
+                        {alerts.map(a => (
+                          <option key={a.alert_id} value={a.alert_id}>
+                            {a.alert_id} ({formatIdentity(a.subject.id)})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Simulation Playback Controls */}
+                    <div className="flex items-center space-x-1.5 bg-[#0e0e16] p-1 rounded-xl border border-[#1e1e2c]">
+                      {isSimulating ? (
+                        <button
+                          onClick={stopAttackSimulation}
+                          className="px-2.5 py-1 rounded-lg bg-amber-600/80 hover:bg-amber-500 text-white text-[11px] font-bold cursor-pointer transition-all flex items-center space-x-1"
+                        >
+                          <span>⏸ Pause</span>
+                        </button>
+                      ) : (
+                        <button
+                          onClick={startAttackSimulation}
+                          className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 text-white text-[11px] font-bold cursor-pointer transition-all flex items-center space-x-1 shadow-sm"
+                        >
+                          <span>▶ Play Simulation</span>
+                        </button>
+                      )}
+                      <button
+                        onClick={resetAttackSimulation}
+                        className="px-2 py-1 rounded-lg bg-[#161622] hover:bg-[#202030] text-zinc-300 text-[11px] cursor-pointer transition-all"
+                        title="Reset simulation to initial state"
+                      >
+                        ⟳ Reset
+                      </button>
+                    </div>
                   </div>
                 </div>
 
-                {/* SVG Graph Canvas with Interactive Bubble Nodes */}
-                <div className="relative w-full bg-black border border-[#181822] rounded-2xl p-6 min-h-[340px] flex items-center justify-center overflow-x-auto shadow-inner">
-                  <svg viewBox="0 0 840 280" className="w-full h-72 min-w-[760px]">
+                {/* Simulation Step Progress & Narrative Telemetry Ticker */}
+                <div className="p-3 rounded-xl border border-[#181826] bg-[#060810] space-y-2 font-mono">
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center space-x-2">
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                        simStep === 0 ? 'bg-zinc-800 text-zinc-300' :
+                        simStep === 1 ? 'bg-indigo-950 text-indigo-300 border border-indigo-700/50' :
+                        simStep === 2 ? 'bg-rose-950 text-rose-300 border border-rose-700/50' :
+                        simStep === 3 ? 'bg-amber-950 text-amber-300 border border-amber-700/50' :
+                        simStep === 4 ? 'bg-sky-950 text-sky-300 border border-sky-700/50' :
+                        simStep === 5 ? 'bg-red-950 text-red-200 border border-red-700/60 animate-pulse' :
+                        'bg-emerald-950 text-emerald-300 border border-emerald-700/50'
+                      }`}>
+                        {simStep === 0 && '⚪ IDLE • Click Play to Simulate'}
+                        {simStep === 1 && '🚨 STEP 1/5: INFILTRATION'}
+                        {simStep === 2 && '⚡ STEP 2/5: TOKEN ABUSE'}
+                        {simStep === 3 && '🔑 STEP 3/5: STS ROLE ASSUME'}
+                        {simStep === 4 && '⚡ STEP 4/5: IAM PRIVILEGE ESCALATION'}
+                        {simStep === 5 && '🛑 STEP 5/5: VAULT DATA EXFILTRATION'}
+                        {simStep === 6 && '🛡️ STEP 6: ZERO TRUST CONTAINMENT'}
+                      </span>
+
+                      <span className="text-zinc-400 text-[11px]">
+                        Target: <span className="text-white font-semibold">{formatIdentity(hopIdentity)}</span>
+                      </span>
+                    </div>
+
+                    {/* Step Quick Jump Pills */}
+                    <div className="flex items-center space-x-1 text-[10px]">
+                      {[
+                        { step: 1, label: '1. Infiltrate' },
+                        { step: 2, label: '2. Token' },
+                        { step: 3, label: '3. STS Role' },
+                        { step: 4, label: '4. PrivEsc' },
+                        { step: 5, label: '5. Exfil' },
+                        { step: 6, label: '6. Revoke' }
+                      ].map(s => (
+                        <button
+                          key={s.step}
+                          onClick={() => {
+                            setSimStep(s.step)
+                            setIsSimulating(false)
+                          }}
+                          className={`px-2 py-0.5 rounded cursor-pointer transition-all ${
+                            simStep >= s.step
+                              ? (s.step === 5 ? 'bg-red-900/60 text-red-200 border border-red-700/50 font-bold' : (s.step === 6 ? 'bg-emerald-950 text-emerald-300 border border-emerald-700/50' : 'bg-cyan-950 text-cyan-300 border border-cyan-800/40'))
+                              : 'bg-[#101018] text-zinc-500 hover:text-zinc-300 border border-[#1a1a26]'
+                          }`}
+                        >
+                          {s.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Narrative Ticker Message */}
+                  <div className="text-xs text-zinc-300 bg-[#090d16] p-2.5 rounded-lg border border-[#141b2a] flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-cyan-400 font-bold">▶</span>
+                      <span>
+                        {simStep === 0 && 'Ready. Generate a synthetic attack or click "Play Simulation" to execute the real-time kill-chain progression.'}
+                        {simStep === 1 && `Compromised credentials authenticated in Okta System Log. Inactivity delta breached; anomalous IP detected.`}
+                        {simStep === 2 && `Bearer token assumed. Browser-to-SDK transition detected with anomalous IP roaming across internal sessions.`}
+                        {simStep === 3 && `AWS STS AssumeRole API invoked. Principal acquired temporary cross-account cloud STS credentials.`}
+                        {simStep === 4 && `IAM privilege escalation verified. Policy 'AdministratorAccess' illicitly attached to contractor principal.`}
+                        {simStep === 5 && `CRITICAL ALERT: Unauthorized s3:GetObject dispatched against customer financial vault ('corp-customer-pii-vault')!`}
+                        {simStep === 6 && `CONTAINMENT ENFORCED: Zero Trust policy auto-executed REVOKE_SESSION. STS tokens purged and session access terminated.`}
+                      </span>
+                    </div>
+
+                    {simStep === 6 && (
+                      <span className="text-[10px] font-bold text-emerald-400 border border-emerald-800/50 bg-[#06180f] px-2 py-0.5 rounded shrink-0">
+                        PROTECTION ACTIVE
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* SVG Graph Canvas with 5-Lane DAG Layout matching user spec */}
+                <div className="relative w-full bg-[#030611] border border-[#161c2c] rounded-2xl p-4 min-h-[430px] flex items-center justify-center overflow-x-auto shadow-inner">
+                  <svg viewBox="0 0 970 410" className="w-full h-[400px] min-w-[940px]">
                     <defs>
-                      <marker id="arrow-cyan" viewBox="0 0 10 10" refX="22" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#38bdf8" />
+                      <marker id="arrow-red" viewBox="0 0 10 10" refX="22" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#ff4d4d" />
+                      </marker>
+                      <marker id="arrow-teal" viewBox="0 0 10 10" refX="22" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#14b8a6" />
                       </marker>
                       <marker id="arrow-amber" viewBox="0 0 10 10" refX="22" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
                         <path d="M 0 0 L 10 5 L 0 10 z" fill="#f59e0b" />
                       </marker>
-                      <marker id="arrow-rose" viewBox="0 0 10 10" refX="22" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#f43f5e" />
-                      </marker>
+
+                      <filter id="glow-red" x="-30%" y="-30%" width="160%" height="160%">
+                        <feGaussianBlur stdDeviation="4" result="blur" />
+                        <feMerge>
+                          <feMergeNode in="blur" />
+                          <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                      </filter>
+
+                      <filter id="glow-indigo" x="-30%" y="-30%" width="160%" height="160%">
+                        <feGaussianBlur stdDeviation="3.5" result="blur" />
+                        <feMerge>
+                          <feMergeNode in="blur" />
+                          <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                      </filter>
                     </defs>
 
-                    {/* Connecting Vector Lines */}
-                    {/* Hop 1: Identity -> Role */}
-                    <path
-                      d="M 120 140 C 200 80, 240 80, 310 140"
-                      fill="none"
-                      stroke="#38bdf8"
-                      strokeWidth="2.2"
-                      strokeDasharray="4 3"
-                      markerEnd="url(#arrow-cyan)"
-                      opacity="0.85"
-                    />
-                    <text x="215" y="90" fill="#7dd3fc" fontSize="10" textAnchor="middle" fontFamily="monospace">
-                      AssumeRole
-                    </text>
+                    {/* Vertical Dashed Lane Dividers */}
+                    <line x1="205" y1="12" x2="205" y2="395" stroke="#131e33" strokeWidth="1" strokeDasharray="4 4" />
+                    <line x1="405" y1="12" x2="405" y2="395" stroke="#131e33" strokeWidth="1" strokeDasharray="4 4" />
+                    <line x1="595" y1="12" x2="595" y2="395" stroke="#131e33" strokeWidth="1" strokeDasharray="4 4" />
+                    <line x1="775" y1="12" x2="775" y2="395" stroke="#131e33" strokeWidth="1" strokeDasharray="4 4" />
 
-                    {/* Hop 2: Role -> Policy */}
-                    <path
-                      d="M 310 140 C 380 200, 440 200, 500 140"
-                      fill="none"
-                      stroke="#f59e0b"
-                      strokeWidth="2.2"
-                      markerEnd="url(#arrow-amber)"
-                      opacity="0.85"
-                    />
-                    <text x="405" y="195" fill="#fcd34d" fontSize="10" textAnchor="middle" fontFamily="monospace">
-                      AttachPolicy
-                    </text>
+                    {/* Column Lane Header Labels */}
+                    <text x="112" y="20" fill="#475569" fontSize="10" fontWeight="bold" fontFamily="monospace" textAnchor="middle" letterSpacing="0.1em">IDENTITIES</text>
+                    <text x="305" y="20" fill="#475569" fontSize="10" fontWeight="bold" fontFamily="monospace" textAnchor="middle" letterSpacing="0.1em">SESSIONS</text>
+                    <text x="500" y="20" fill="#475569" fontSize="10" fontWeight="bold" fontFamily="monospace" textAnchor="middle" letterSpacing="0.1em">ROLES &amp; STS</text>
+                    <text x="685" y="20" fill="#475569" fontSize="10" fontWeight="bold" fontFamily="monospace" textAnchor="middle" letterSpacing="0.1em">POLICIES</text>
+                    <text x="872" y="20" fill="#475569" fontSize="10" fontWeight="bold" fontFamily="monospace" textAnchor="middle" letterSpacing="0.1em">TARGET RESOURCES</text>
 
-                    {/* Hop 3: Policy -> Target Resource */}
-                    <path
-                      d="M 500 140 C 580 80, 630 80, 700 140"
-                      fill="none"
-                      stroke="#f43f5e"
-                      strokeWidth="2.2"
-                      markerEnd="url(#arrow-rose)"
-                      opacity="0.85"
-                    />
-                    <text x="600" y="90" fill="#fda4af" fontSize="10" textAnchor="middle" fontFamily="monospace">
-                      Exfiltrate
-                    </text>
+                    {/* ========================================================
+                        BACKGROUND EDGES (Benign Telemetry Curves)
+                       ======================================================== */}
+                    {/* Alice -> Session: sess-ch */}
+                    <path d="M 185 95 C 210 95, 210 115, 235 115" fill="none" stroke="#134e4a" strokeWidth="1.3" opacity="0.45" markerEnd="url(#arrow-teal)" />
+                    {/* Session: sess-ch -> sts.amazonaws.com */}
+                    <path d="M 380 115 C 410 115, 400 190, 430 190" fill="none" stroke="#134e4a" strokeWidth="1.3" opacity="0.45" markerEnd="url(#arrow-teal)" />
+                    {/* sts.amazonaws.com -> corp-analytics-r.. */}
+                    <path d="M 575 190 C 670 190, 710 130, 795 130" fill="none" stroke="#134e4a" strokeWidth="1.3" opacity="0.45" markerEnd="url(#arrow-teal)" />
+                    {/* sts.amazonaws.com -> corp-dev-builds */}
+                    <path d="M 575 205 C 670 205, 710 270, 795 270" fill="none" stroke="#134e4a" strokeWidth="1.3" opacity="0.45" markerEnd="url(#arrow-teal)" />
 
-                    {/* Node 1 Bubble: Attacker Identity (Info on Hover) */}
+                    {/* ========================================================
+                        ACTIVE ATTACK PATH EDGES (Red Dashed Animated Curves)
+                       ======================================================== */}
+                    {/* Hop 1: Bob -> Session: bob-ses */}
+                    <path
+                      id="sim-path-1"
+                      d="M 185 160 C 215 160, 205 55, 235 55"
+                      fill="none"
+                      stroke="#ff4d4d"
+                      strokeWidth={simStep >= 1 ? "2.6" : "2"}
+                      strokeDasharray="6 4"
+                      markerEnd="url(#arrow-red)"
+                      className={simStep >= 1 ? "animate-pulse" : ""}
+                    />
+
+                    {/* Hop 1b: Branching Token Abuse / Probe -> Session: sess-di */}
+                    <path
+                      d="M 185 160 C 210 160, 210 175, 235 175"
+                      fill="none"
+                      stroke="#ff4d4d"
+                      strokeWidth="2"
+                      strokeDasharray="6 4"
+                      markerEnd="url(#arrow-red)"
+                      opacity={simStep >= 2 ? "1" : "0.75"}
+                    />
+
+                    {/* Hop 1c: Lateral Session Probes downward */}
+                    <path
+                      d="M 185 160 C 210 160, 205 295, 235 295"
+                      fill="none"
+                      stroke="#ff4d4d"
+                      strokeWidth="1.8"
+                      strokeDasharray="5 3"
+                      markerEnd="url(#arrow-red)"
+                      opacity={simStep >= 2 ? "0.9" : "0.55"}
+                    />
+                    <path
+                      d="M 185 160 C 210 160, 205 355, 235 355"
+                      fill="none"
+                      stroke="#ff4d4d"
+                      strokeWidth="1.8"
+                      strokeDasharray="5 3"
+                      markerEnd="url(#arrow-red)"
+                      opacity={simStep >= 2 ? "0.9" : "0.55"}
+                    />
+
+                    {/* Hop 2: Session: bob-ses -> sts.amazonaws.com */}
+                    <path
+                      id="sim-path-2"
+                      d="M 380 55 C 420 55, 390 190, 430 190"
+                      fill="none"
+                      stroke="#ff4d4d"
+                      strokeWidth={simStep >= 2 ? "2.6" : "2"}
+                      strokeDasharray="6 4"
+                      markerEnd="url(#arrow-red)"
+                      className={simStep >= 2 ? "animate-pulse" : ""}
+                    />
+
+                    {/* Hop 3: sts.amazonaws.com -> arn:aws:iam::aws.. */}
+                    <path
+                      id="sim-path-3"
+                      d="M 575 198 L 615 198"
+                      fill="none"
+                      stroke="#ff4d4d"
+                      strokeWidth={simStep >= 3 ? "2.8" : "2"}
+                      strokeDasharray="6 4"
+                      markerEnd="url(#arrow-red)"
+                      className={simStep >= 3 ? "animate-pulse" : ""}
+                    />
+
+                    {/* Hop 4: arn:aws:iam::aws.. -> corp-customer-pi.. */}
+                    <path
+                      id="sim-path-4"
+                      d="M 760 198 L 795 198"
+                      fill="none"
+                      stroke="#ff4d4d"
+                      strokeWidth={simStep >= 4 ? "3" : "2.2"}
+                      strokeDasharray="6 4"
+                      markerEnd="url(#arrow-red)"
+                      className={simStep >= 4 ? "animate-pulse" : ""}
+                    />
+
+                    {/* ========================================================
+                        COLUMN 1: IDENTITIES
+                       ======================================================== */}
+                    {/* 1.1: Alice */}
                     <g
-                      transform="translate(120, 140)"
+                      transform="translate(40, 75)"
+                      className="cursor-pointer group"
+                      onMouseEnter={() => setActiveBubble({
+                        id: 'alice@corp.internal',
+                        title: 'Alice (Internal Analyst)',
+                        type: 'IDENTITY',
+                        roleDesc: 'Standard data analyst principal identity',
+                        attributes: { 'Status': 'Normal', 'Clearance': 'Tier 1 Analyst', '2FA': 'Enforced' },
+                        color: 'sky',
+                        icon: '👤'
+                      })}
+                      onMouseLeave={() => setActiveBubble(null)}
+                    >
+                      <rect width="145" height="40" rx="6" fill="#09101d" stroke="#1b283d" strokeWidth="1" className="group-hover:stroke-cyan-500/50 transition-all" />
+                      <text x="12" y="17" fill="#cbd5e1" fontSize="11" fontWeight="bold" fontFamily="monospace">alice@corp.inter..</text>
+                      <text x="12" y="30" fill="#64748b" fontSize="8.5" fontWeight="600" fontFamily="monospace">IDENTITY • NORMAL</text>
+                    </g>
+
+                    {/* 1.2: Bob (Compromised Attacker) */}
+                    <g
+                      transform="translate(40, 140)"
                       className="cursor-pointer group"
                       onMouseEnter={() => setActiveBubble({
                         id: hopIdentity,
@@ -939,27 +1201,151 @@ export default function App() {
                       })}
                       onMouseLeave={() => setActiveBubble(null)}
                     >
-                      <circle cx="0" cy="0" r="48" fill="transparent" pointerEvents="all" />
-                      <circle cx="0" cy="0" r="36" fill="#0b1320" stroke="#38bdf8" strokeWidth="2.5" className="group-hover:stroke-sky-300 group-hover:scale-105 transition-all drop-shadow-[0_0_8px_rgba(56,189,248,0.25)] pointer-events-none" />
-                      <circle cx="0" cy="0" r="42" fill="none" stroke="#38bdf8" strokeWidth="1" strokeDasharray="3 3" opacity="0.4" className="animate-spin pointer-events-none" />
-                      <text x="0" y="-7" fill="#ffffff" fontSize="15" textAnchor="middle" className="pointer-events-none">👤</text>
-                      <text x="0" y="9" fill="#e0f2fe" fontSize="10" fontWeight="bold" textAnchor="middle" className="pointer-events-none">Attacker</text>
-                      <text x="0" y="21" fill="#7dd3fc" fontSize="8" fontFamily="monospace" textAnchor="middle" className="pointer-events-none">{formatIdentity(hopIdentity).slice(0, 10)}</text>
+                      {simStep >= 1 && (
+                        <rect x="-3" y="-3" width="151" height="48" rx="9" fill="none" stroke="#ff4d4d" strokeWidth="2" strokeDasharray="4 2" className="animate-spin" opacity="0.7" />
+                      )}
+                      <rect
+                        width="145"
+                        height="42"
+                        rx="6"
+                        fill="#0f172a"
+                        stroke={simStep >= 1 ? '#ff4d4d' : '#6366f1'}
+                        strokeWidth="2.4"
+                        filter={simStep >= 1 ? 'url(#glow-red)' : 'url(#glow-indigo)'}
+                        className="group-hover:scale-105 transition-all"
+                      />
+                      <text x="12" y="18" fill="#ffffff" fontSize="11" fontWeight="bold" fontFamily="monospace">
+                        {formatIdentity(hopIdentity).slice(0, 15)}
+                      </text>
+                      <text x="12" y="32" fill={simStep >= 1 ? '#fca5a5' : '#a5b4fc'} fontSize="8.5" fontWeight="600" fontFamily="monospace">
+                        IDENTITY • {simStep >= 1 ? 'COMPROMISED' : 'NORMAL'}
+                      </text>
                     </g>
 
-                    {/* Node 2 Bubble: Cloud Role (Info on Hover) */}
+                    {/* 1.3: Charlie */}
                     <g
-                      transform="translate(310, 140)"
+                      transform="translate(40, 205)"
+                      className="cursor-pointer group"
+                      onMouseEnter={() => setActiveBubble({
+                        id: 'charlie.analyst@corp.internal',
+                        title: 'Charlie (Analyst)',
+                        type: 'IDENTITY',
+                        roleDesc: 'Ordinary data science identity',
+                        attributes: { 'Status': 'Normal', 'Clearance': 'Tier 1 Analyst', 'Department': 'Finance Analytics' },
+                        color: 'sky',
+                        icon: '👤'
+                      })}
+                      onMouseLeave={() => setActiveBubble(null)}
+                    >
+                      <rect width="145" height="40" rx="6" fill="#09101d" stroke="#1b283d" strokeWidth="1" className="group-hover:stroke-cyan-500/50 transition-all" />
+                      <text x="12" y="17" fill="#cbd5e1" fontSize="11" fontWeight="bold" fontFamily="monospace">charlie.analyst@..</text>
+                      <text x="12" y="30" fill="#64748b" fontSize="8.5" fontWeight="600" fontFamily="monospace">IDENTITY • NORMAL</text>
+                    </g>
+
+                    {/* 1.4: Diana Admin */}
+                    <g
+                      transform="translate(40, 270)"
+                      className="cursor-pointer group"
+                      onMouseEnter={() => setActiveBubble({
+                        id: 'diana.admin@corp.internal',
+                        title: 'Diana Admin (Protected Safeguard)',
+                        type: 'IDENTITY',
+                        roleDesc: 'Critical infrastructure admin with break-glass safeguard active',
+                        attributes: { 'Status': 'Protected', 'Break-Glass Safeguard': 'ACTIVE (Deny Action)', 'Privilege': 'Tier 4 Admin' },
+                        color: 'rose',
+                        icon: '🛡️'
+                      })}
+                      onMouseLeave={() => setActiveBubble(null)}
+                    >
+                      <rect width="145" height="40" rx="6" fill="#18090d" stroke="#881337" strokeWidth="1.5" className="group-hover:stroke-rose-500 transition-all" />
+                      <text x="12" y="17" fill="#fecdd3" fontSize="11" fontWeight="bold" fontFamily="monospace">diana.admin@corp..</text>
+                      <text x="12" y="30" fill="#f43f5e" fontSize="8.5" fontWeight="bold" fontFamily="monospace">IDENTITY • HIGH</text>
+                    </g>
+
+                    {/* ========================================================
+                        COLUMN 2: SESSIONS
+                       ======================================================== */}
+                    {/* 2.1: Attacker Session */}
+                    <g
+                      transform="translate(235, 35)"
+                      className="cursor-pointer group"
+                      onMouseEnter={() => setActiveBubble({
+                        id: 'Session: bob-ses..',
+                        title: 'Attacker Authenticated Session',
+                        type: 'SESSION',
+                        roleDesc: 'Active Okta authenticated session established from anomalous IP',
+                        attributes: { 'Session ID': 'bob-ses-091a', 'Transport': 'Browser-to-SDK', 'Status': simStep >= 2 ? 'HIJACKED' : 'ACTIVE' },
+                        color: 'sky',
+                        icon: '🔑'
+                      })}
+                      onMouseLeave={() => setActiveBubble(null)}
+                    >
+                      <rect
+                        width="145"
+                        height="40"
+                        rx="6"
+                        fill="#0c1524"
+                        stroke={simStep >= 2 ? '#ff4d4d' : '#1e293b'}
+                        strokeWidth={simStep >= 2 ? '2' : '1'}
+                        filter={simStep >= 2 ? 'url(#glow-red)' : undefined}
+                        className="group-hover:stroke-rose-400 transition-all"
+                      />
+                      <text x="12" y="17" fill="#ffffff" fontSize="11" fontWeight="bold" fontFamily="monospace">Session: bob-ses..</text>
+                      <text x="12" y="30" fill={simStep >= 2 ? '#fca5a5' : '#64748b'} fontSize="8.5" fontWeight="600" fontFamily="monospace">
+                        SESSION • {simStep >= 2 ? 'HIJACKED' : 'NORMAL'}
+                      </text>
+                    </g>
+
+                    {/* 2.2: sess-ch */}
+                    <g transform="translate(235, 95)" className="cursor-pointer group">
+                      <rect width="145" height="40" rx="6" fill="#080e18" stroke="#162032" strokeWidth="1" />
+                      <text x="12" y="17" fill="#94a3b8" fontSize="11" fontWeight="bold" fontFamily="monospace">Session: sess-ch..</text>
+                      <text x="12" y="30" fill="#475569" fontSize="8.5" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
+                    </g>
+
+                    {/* 2.3: sess-di */}
+                    <g transform="translate(235, 155)" className="cursor-pointer group">
+                      <rect width="145" height="40" rx="6" fill="#080e18" stroke={simStep >= 2 ? '#f43f5e' : '#162032'} strokeWidth="1" />
+                      <text x="12" y="17" fill="#94a3b8" fontSize="11" fontWeight="bold" fontFamily="monospace">Session: sess-di..</text>
+                      <text x="12" y="30" fill="#475569" fontSize="8.5" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
+                    </g>
+
+                    {/* 2.4: sess-ok */}
+                    <g transform="translate(235, 215)" className="cursor-pointer group">
+                      <rect width="145" height="40" rx="6" fill="#080e18" stroke="#162032" strokeWidth="1" />
+                      <text x="12" y="17" fill="#94a3b8" fontSize="11" fontWeight="bold" fontFamily="monospace">Session: sess-ok..</text>
+                      <text x="12" y="30" fill="#475569" fontSize="8.5" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
+                    </g>
+
+                    {/* 2.5: sess-ok */}
+                    <g transform="translate(235, 275)" className="cursor-pointer group">
+                      <rect width="145" height="40" rx="6" fill="#080e18" stroke="#162032" strokeWidth="1" />
+                      <text x="12" y="17" fill="#94a3b8" fontSize="11" fontWeight="bold" fontFamily="monospace">Session: sess-ok..</text>
+                      <text x="12" y="30" fill="#475569" fontSize="8.5" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
+                    </g>
+
+                    {/* 2.6: sess-ok */}
+                    <g transform="translate(235, 335)" className="cursor-pointer group">
+                      <rect width="145" height="40" rx="6" fill="#080e18" stroke="#162032" strokeWidth="1" />
+                      <text x="12" y="17" fill="#94a3b8" fontSize="11" fontWeight="bold" fontFamily="monospace">Session: sess-ok..</text>
+                      <text x="12" y="30" fill="#475569" fontSize="8.5" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
+                    </g>
+
+                    {/* ========================================================
+                        COLUMN 3: ROLES & STS
+                       ======================================================== */}
+                    <g
+                      transform="translate(430, 175)"
                       className="cursor-pointer group"
                       onMouseEnter={() => setActiveBubble({
                         id: hopRole,
-                        title: 'Assumed AWS IAM Role',
+                        title: 'Assumed AWS IAM Role / STS Token',
                         type: 'ROLE',
                         roleDesc: 'Intermediate cloud service role assumed via STS tokens',
                         attributes: {
-                          'Role Name': hopRole,
-                          'Service': 'AWS IAM / STS',
-                          'Session Continuity': 'Correlated via Session ID & IP',
+                          'Role Target': hopRole,
+                          'Service': 'AWS IAM / STS (sts.amazonaws.com)',
+                          'Action': 'sts:AssumeRole',
                           'Privilege Scope': 'Intermediate Cloud Access'
                         },
                         color: 'amber',
@@ -967,16 +1353,31 @@ export default function App() {
                       })}
                       onMouseLeave={() => setActiveBubble(null)}
                     >
-                      <circle cx="0" cy="0" r="44" fill="transparent" pointerEvents="all" />
-                      <circle cx="0" cy="0" r="32" fill="#181308" stroke="#f59e0b" strokeWidth="2.2" className="group-hover:stroke-amber-300 group-hover:scale-105 transition-all drop-shadow-[0_0_8px_rgba(245,158,11,0.2)] pointer-events-none" />
-                      <text x="0" y="-5" fill="#ffffff" fontSize="13" textAnchor="middle" className="pointer-events-none">🔑</text>
-                      <text x="0" y="9" fill="#fef3c7" fontSize="10" fontWeight="bold" textAnchor="middle" className="pointer-events-none">Cloud Role</text>
-                      <text x="0" y="20" fill="#fcd34d" fontSize="8" fontFamily="monospace" textAnchor="middle" className="pointer-events-none">{hopRole.slice(0, 11)}..</text>
+                      {simStep >= 3 && (
+                        <rect x="-3" y="-3" width="151" height="52" rx="9" fill="none" stroke="#f59e0b" strokeWidth="2" strokeDasharray="4 2" className="animate-spin" opacity="0.6" />
+                      )}
+                      <rect
+                        width="145"
+                        height="46"
+                        rx="7"
+                        fill="#451a03"
+                        stroke="#f59e0b"
+                        strokeWidth="2.2"
+                        className="group-hover:scale-105 transition-all drop-shadow-[0_0_12px_rgba(245,158,11,0.3)]"
+                      />
+                      <text x="12" y="20" fill="#ffffff" fontSize="11.5" fontWeight="bold" fontFamily="monospace">
+                        {hopRole.includes('sts') ? hopRole : (hopRole.slice(0, 16))}
+                      </text>
+                      <text x="12" y="34" fill="#fcd34d" fontSize="8.5" fontWeight="bold" fontFamily="monospace">
+                        ROLE • MEDIUM
+                      </text>
                     </g>
 
-                    {/* Node 3 Bubble: Escalated Policy (Info on Hover) */}
+                    {/* ========================================================
+                        COLUMN 4: POLICIES
+                       ======================================================== */}
                     <g
-                      transform="translate(500, 140)"
+                      transform="translate(615, 175)"
                       className="cursor-pointer group"
                       onMouseEnter={() => setActiveBubble({
                         id: hopPolicy,
@@ -985,52 +1386,107 @@ export default function App() {
                         roleDesc: 'Critical administrative permission policy attached illicitly',
                         attributes: {
                           'Policy ARN': `arn:aws:iam::aws:policy/${hopPolicy}`,
-                          'Escalation Level': 'CRITICAL Privilege Grant',
+                          'Escalation Level': 'CRITICAL Administrative Privilege',
                           'Action Type': 'AttachUserPolicy / PutPolicy',
-                          'Risk Level': 'Maximum Administrative Scope'
+                          'Risk Level': 'Maximum Cloud Scope'
                         },
                         color: 'rose',
                         icon: '⚡'
                       })}
                       onMouseLeave={() => setActiveBubble(null)}
                     >
-                      <circle cx="0" cy="0" r="44" fill="transparent" pointerEvents="all" />
-                      <circle cx="0" cy="0" r="32" fill="#200a0e" stroke="#f43f5e" strokeWidth="2.2" className="group-hover:stroke-rose-300 group-hover:scale-105 transition-all drop-shadow-[0_0_8px_rgba(244,63,94,0.2)] pointer-events-none" />
-                      <text x="0" y="-5" fill="#ffffff" fontSize="13" textAnchor="middle" className="pointer-events-none">⚡</text>
-                      <text x="0" y="9" fill="#ffe4e6" fontSize="10" fontWeight="bold" textAnchor="middle" className="pointer-events-none">Escalated</text>
-                      <text x="0" y="20" fill="#fda4af" fontSize="8" fontFamily="monospace" textAnchor="middle" className="pointer-events-none">{hopPolicy.slice(0, 11)}..</text>
+                      {simStep >= 4 && (
+                        <rect x="-3" y="-3" width="151" height="52" rx="9" fill="none" stroke="#38bdf8" strokeWidth="2" strokeDasharray="4 2" className="animate-spin" opacity="0.6" />
+                      )}
+                      <rect
+                        width="145"
+                        height="46"
+                        rx="7"
+                        fill="#0b1322"
+                        stroke="#38bdf8"
+                        strokeWidth={simStep >= 4 ? "2.2" : "1.8"}
+                        className="group-hover:scale-105 transition-all drop-shadow-[0_0_10px_rgba(56,189,248,0.25)]"
+                      />
+                      <text x="12" y="20" fill="#ffffff" fontSize="11" fontWeight="bold" fontFamily="monospace">
+                        arn:aws:iam::aws..
+                      </text>
+                      <text x="12" y="34" fill="#7dd3fc" fontSize="8.5" fontWeight="bold" fontFamily="monospace">
+                        POLICY • MEDIUM
+                      </text>
                     </g>
 
-                    {/* Node 4 Bubble: Target Resource (Info on Hover) */}
+                    {/* ========================================================
+                        COLUMN 5: TARGET RESOURCES
+                       ======================================================== */}
+                    {/* 5.1: corp-analytics-r.. */}
+                    <g transform="translate(795, 110)" className="cursor-pointer group">
+                      <rect width="145" height="40" rx="6" fill="#061a14" stroke="#065f46" strokeWidth="1" />
+                      <text x="12" y="17" fill="#cbd5e1" fontSize="11" fontWeight="bold" fontFamily="monospace">corp-analytics-r..</text>
+                      <text x="12" y="30" fill="#34d399" fontSize="8.5" fontWeight="600" fontFamily="monospace">RESOURCE • NORMAL</text>
+                    </g>
+
+                    {/* 5.2: corp-customer-pi.. (High-Risk Exfiltration Target) */}
                     <g
-                      transform="translate(700, 140)"
+                      transform="translate(795, 175)"
                       className="cursor-pointer group"
                       onMouseEnter={() => setActiveBubble({
                         id: hopResource,
-                        title: 'Target Sensitive Resource',
+                        title: 'Target Sensitive Resource Vault',
                         type: 'RESOURCE',
-                        roleDesc: 'High-sensitivity catalog resource accessed or staged for exfiltration',
+                        roleDesc: 'High-sensitivity customer financial vault accessed illicitly',
                         attributes: {
-                          'Resource Target': hopResource,
-                          'Data Classification': 'HIGH SENSITIVITY (PII / Keys)',
-                          'Action': 's3:GetObject / DataExport',
-                          'Status': 'Under Containment Simulation'
+                          'Target Resource': hopResource,
+                          'Data Classification': 'HIGH SENSITIVITY (PII / Vault)',
+                          'Action': 's3:GetObject / Exfiltration Attempt',
+                          'Status': simStep >= 6 ? 'CONTAINED (REVOKE_SESSION)' : 'TARGET OF ACTIVE EXFILTRATION'
                         },
                         color: 'red',
                         icon: '🛑'
                       })}
                       onMouseLeave={() => setActiveBubble(null)}
                     >
-                      <circle cx="0" cy="0" r="48" fill="transparent" pointerEvents="all" />
-                      <circle cx="0" cy="0" r="36" fill="#240a0e" stroke="#ef4444" strokeWidth="2.5" className="group-hover:stroke-red-300 group-hover:scale-105 transition-all drop-shadow-[0_0_8px_rgba(239,68,68,0.25)] pointer-events-none" />
-                      <circle cx="0" cy="0" r="42" fill="none" stroke="#ef4444" strokeWidth="1" strokeDasharray="3 3" opacity="0.4" className="animate-spin pointer-events-none" />
-                      <text x="0" y="-7" fill="#ffffff" fontSize="15" textAnchor="middle" className="pointer-events-none">🛑</text>
-                      <text x="0" y="9" fill="#ffffff" fontSize="10" fontWeight="bold" textAnchor="middle" className="pointer-events-none">Vault Target</text>
-                      <text x="0" y="21" fill="#fca5a5" fontSize="8" fontFamily="monospace" textAnchor="middle" className="pointer-events-none">{hopResource.slice(0, 12)}</text>
+                      {simStep >= 5 && (
+                        <rect x="-4" y="-4" width="153" height="54" rx="10" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeDasharray="5 3" className="animate-spin" opacity="0.8" />
+                      )}
+                      <rect
+                        width="145"
+                        height="46"
+                        rx="7"
+                        fill="#450a0a"
+                        stroke="#ef4444"
+                        strokeWidth="2.6"
+                        filter={simStep >= 5 ? 'url(#glow-red)' : undefined}
+                        className={`group-hover:scale-105 transition-all drop-shadow-[0_0_16px_rgba(239,68,68,0.5)] ${
+                          simStep === 5 ? 'animate-pulse' : ''
+                        }`}
+                      />
+                      <text x="12" y="20" fill="#ffffff" fontSize="11" fontWeight="bold" fontFamily="monospace">
+                        {hopResource.includes('vault') ? 'corp-customer-pi..' : (hopResource.slice(0, 16))}
+                      </text>
+                      <text x="12" y="34" fill="#fca5a5" fontSize="8.5" fontWeight="bold" fontFamily="monospace">
+                        RESOURCE • HIGH
+                      </text>
                     </g>
+
+                    {/* 5.3: corp-dev-builds */}
+                    <g transform="translate(795, 250)" className="cursor-pointer group">
+                      <rect width="145" height="40" rx="6" fill="#061a14" stroke="#065f46" strokeWidth="1" />
+                      <text x="12" y="17" fill="#cbd5e1" fontSize="11" fontWeight="bold" fontFamily="monospace">corp-dev-builds</text>
+                      <text x="12" y="30" fill="#34d399" fontSize="8.5" fontWeight="600" fontFamily="monospace">RESOURCE • NORMAL</text>
+                    </g>
+
+                    {/* Zero Trust Containment Shield Overlay when Step 6 reached */}
+                    {simStep >= 6 && (
+                      <g transform="translate(485, 95)" className="animate-bounce">
+                        <rect x="-10" y="-10" width="220" height="38" rx="8" fill="#03180f" stroke="#10b981" strokeWidth="2" filter="url(#glow-indigo)" />
+                        <text x="100" y="14" fill="#6ee7b7" fontSize="11" fontWeight="bold" fontFamily="monospace" textAnchor="middle">
+                          🛡️ REVOKE_SESSION ENFORCED
+                        </text>
+                      </g>
+                    )}
                   </svg>
 
-                  {/* Bubble Inspection Flyout Card (Displays dynamically on hover) */}
+                  {/* Interactive Node Telemetry Flyout Card (Displays on hover) */}
                   {activeBubble ? (
                     <div className="absolute right-6 top-6 w-80 p-4 rounded-2xl border border-cyan-800/60 bg-[#070b12]/95 backdrop-blur-md shadow-2xl space-y-3 z-30 font-mono pointer-events-none animate-fadeIn">
                       <div className="flex items-center justify-between border-b border-[#182030] pb-2">
@@ -1063,16 +1519,16 @@ export default function App() {
                       </div>
                     </div>
                   ) : (
-                    <div className="absolute right-6 top-6 px-3.5 py-2 rounded-xl border border-[#181824] bg-[#07070b]/80 backdrop-blur text-[11px] font-mono text-zinc-400 pointer-events-none flex items-center space-x-2 shadow-sm">
-                      <span className="w-2 h-2 rounded-full bg-cyan-500/60 animate-pulse"></span>
-                      <span>Hover over any bubble node to inspect credentials</span>
+                    <div className="absolute right-6 bottom-4 px-3.5 py-1.5 rounded-xl border border-[#181824] bg-[#07070b]/80 backdrop-blur text-[10px] font-mono text-zinc-400 pointer-events-none flex items-center space-x-2 shadow-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-500/60 animate-pulse"></span>
+                      <span>Hover over any card to inspect credentials and role details</span>
                     </div>
                   )}
                 </div>
 
                 <div className="flex items-center justify-between text-xs font-mono text-zinc-400 pt-1">
-                  <span>💡 Tip: Hover over any bubble node in the canvas above to inspect details without clutter.</span>
-                  <span className="text-cyan-400/80">{graphData?.nodes.length} Nodes Mapped</span>
+                  <span>💡 Tip: Trigger "⚡ Generate Attack" in the left panel to watch the live simulation unfold automatically.</span>
+                  <span className="text-cyan-400/80">5 Stages • 15 Nodes Active</span>
                 </div>
               </div>
             </div>
