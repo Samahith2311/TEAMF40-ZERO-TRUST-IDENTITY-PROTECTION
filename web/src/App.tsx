@@ -1062,26 +1062,23 @@ export default function App() {
               </div>
 
               <div className="p-4 border border-[#1c1c26] rounded-2xl bg-[#08080c] space-y-3 shadow-sm">
-                {/* Header & Controls */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-2.5 pb-2 border-b border-[#161622]">
-                  <div>
-                    <h2 className="text-sm font-bold text-white flex items-center space-x-2">
+                {/* Header & Controls - strictly ONE line with equal-scale Play & Reset buttons */}
+                <div className="flex items-center justify-between gap-3 pb-2.5 border-b border-[#161622] flex-nowrap">
+                  <div className="flex items-center space-x-2 min-w-0 shrink">
+                    <h2 className="text-sm font-bold text-white whitespace-nowrap flex items-center space-x-2">
                       <span>Attack Timeline &amp; Blast Radius</span>
-                      <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${
+                      <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold uppercase tracking-wider shrink-0 ${
                         isSimulating ? 'bg-rose-950 text-rose-300 border border-rose-800/60 animate-pulse' : 'bg-[#061710] text-emerald-300 border border-emerald-800/40'
                       }`}>
-                        {isSimulating ? '● SIMULATING ATTACK' : 'LIVE TELEMETRY'}
+                        {isSimulating ? '● SIMULATING' : 'LIVE'}
                       </span>
                     </h2>
-                    <p className="text-[11px] text-zinc-400">
-                      Automated Attack Path Reconstruction: Infiltration → Hijacked Session → Cloud Role → Unusual Admin Access → Data Vault
-                    </p>
                   </div>
 
-                  <div className="flex items-center space-x-2.5 text-xs font-mono">
+                  <div className="flex items-center space-x-2.5 shrink-0">
                     {/* Incident Selector */}
-                    <div className="flex items-center space-x-1.5">
-                      <span className="text-zinc-400 text-[11px]">Incident:</span>
+                    <div className="flex items-center space-x-1.5 text-xs font-mono">
+                      <span className="text-zinc-400 text-[11px] whitespace-nowrap">Incident:</span>
                       <select
                         value={selectedAlert?.alert_id || ''}
                         onChange={e => {
@@ -1091,7 +1088,7 @@ export default function App() {
                             resetAttackSimulation()
                           }
                         }}
-                        className="bg-[#101016] border border-[#222230] text-zinc-200 text-xs rounded-lg px-2 py-1 font-mono outline-none cursor-pointer"
+                        className="bg-[#101016] border border-[#222230] text-zinc-200 text-xs rounded-lg px-2.5 py-1.5 font-mono outline-none cursor-pointer max-w-[170px] truncate focus:border-cyan-500/50"
                       >
                         {alerts.map(a => (
                           <option key={a.alert_id} value={a.alert_id}>
@@ -1101,29 +1098,32 @@ export default function App() {
                       </select>
                     </div>
 
-                    {/* Simulation Playback Controls */}
-                    <div className="flex items-center space-x-1 bg-[#0e0e16] p-1 rounded-xl border border-[#1e1e2c]">
+                    {/* Simulation Playback Controls - Equal Scale Buttons within Widget */}
+                    <div className="flex items-center space-x-2">
                       {isSimulating ? (
                         <button
                           onClick={stopAttackSimulation}
-                          className="px-2.5 py-1 rounded-lg bg-amber-600/80 hover:bg-amber-500 text-white text-[11px] font-bold cursor-pointer transition-all flex items-center space-x-1"
+                          className="h-8 px-3.5 rounded-lg bg-amber-600/80 hover:bg-amber-500 border border-amber-500/50 text-white text-xs font-bold cursor-pointer transition-all flex items-center justify-center space-x-1.5 shadow-sm active:scale-95"
                         >
-                          <span>⏸ Pause</span>
+                          <span>⏸</span>
+                          <span className="whitespace-nowrap">Pause Attack</span>
                         </button>
                       ) : (
                         <button
                           onClick={startAttackSimulation}
-                          className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 text-white text-[11px] font-bold cursor-pointer transition-all flex items-center space-x-1 shadow-sm"
+                          className="h-8 px-3.5 rounded-lg bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 border border-cyan-400/40 text-white text-xs font-bold cursor-pointer transition-all flex items-center justify-center space-x-1.5 shadow-[0_0_12px_rgba(56,189,248,0.25)] active:scale-95"
                         >
-                          <span>▶ Play Attack Simulation</span>
+                          <span>▶</span>
+                          <span className="whitespace-nowrap">Play Attack</span>
                         </button>
                       )}
                       <button
                         onClick={resetAttackSimulation}
-                        className="px-2 py-1 rounded-lg bg-[#161622] hover:bg-[#202030] text-zinc-300 text-[11px] cursor-pointer transition-all"
+                        className="h-8 px-3.5 rounded-lg bg-[#141824] hover:bg-[#1c2234] border border-[#263045] hover:border-cyan-500/40 text-zinc-200 text-xs font-bold cursor-pointer transition-all flex items-center justify-center space-x-1.5 active:scale-95 shadow-sm"
                         title="Reset simulation to initial state"
                       >
-                        ⟳ Reset
+                        <span>⟳</span>
+                        <span className="whitespace-nowrap">Reset Attack</span>
                       </button>
                     </div>
                   </div>

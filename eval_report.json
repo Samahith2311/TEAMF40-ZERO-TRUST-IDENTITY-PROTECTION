@@ -192,8 +192,8 @@
     "failure_details": []
   },
   "latency": {
-    "per_event_ms": 0.0266,
-    "total_ms": 0.2924,
+    "per_event_ms": 0.0212,
+    "total_ms": 0.2328,
     "load_profile": "replay_n=11_identities=5"
   },
   "split": {
