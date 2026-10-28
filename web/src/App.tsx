@@ -138,6 +138,7 @@ export default function App() {
   const [simStep, setSimStep] = useState<number>(0) // 0: Idle, 1: Infiltration, 2: Token Abuse, 3: STS Role, 4: PrivEsc, 5: Exfiltration, 6: Revocation
   const [isSimulating, setIsSimulating] = useState<boolean>(false)
   const [simSpeed] = useState<number>(1400) // ms per step
+  const [showFeedOnGraph, setShowFeedOnGraph] = useState<boolean>(false)
   const simTimerRef = useRef<any>(null)
 
   const startAttackSimulation = () => {
@@ -1166,6 +1167,19 @@ export default function App() {
                         <span>⟳</span>
                         <span className="whitespace-nowrap">Reset Attack</span>
                       </button>
+
+                      {/* Wide View Toggle Button */}
+                      <button
+                        onClick={() => setShowFeedOnGraph(!showFeedOnGraph)}
+                        className={`h-8 px-2.5 rounded-lg border text-[11px] font-mono transition-all flex items-center space-x-1.5 cursor-pointer whitespace-nowrap ${
+                          showFeedOnGraph
+                            ? 'bg-cyan-950/80 text-cyan-300 border-cyan-700/60'
+                            : 'bg-[#12121c] text-zinc-300 border-[#222230] hover:text-white hover:border-cyan-500/50'
+                        }`}
+                        title={showFeedOnGraph ? "Collapse Activity Stream to maximize graph width" : "Show Activity Stream side panel"}
+                      >
+                        <span>{showFeedOnGraph ? '⇥ Collapse Stream' : '⇤ Full Width View'}</span>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -1249,10 +1263,10 @@ export default function App() {
                 </div>
 
                 {/* SVG Graph Canvas - Fitted 100% to box matching reference architecture with arrow simulation */}
-                <div className="relative w-full bg-[#020618] border border-[#10192b] rounded-2xl p-2.5 flex items-center justify-center shadow-inner overflow-hidden">
+                <div className="relative w-full bg-[#020618] border border-[#10192b] rounded-2xl p-4 flex items-center justify-center shadow-inner overflow-hidden">
                   <svg
-                    viewBox="0 0 1024 450"
-                    className="w-full h-auto max-h-[440px]"
+                    viewBox="0 0 1180 490"
+                    className="w-full h-auto min-h-[460px] max-h-[620px]"
                     preserveAspectRatio="xMidYMid meet"
                   >
                     <defs>
@@ -1282,9 +1296,9 @@ export default function App() {
                         <path d="M 0 1 L 9 5 L 0 9 z" fill="#0d9488" opacity="0.5" />
                       </marker>
 
-                      {/* Glow Filter for Active Arrows */}
+                      {/* Glow Filters */}
                       <filter id="glow-arrow-red" x="-20%" y="-20%" width="140%" height="140%">
-                        <feGaussianBlur stdDeviation="2.5" result="blur" />
+                        <feGaussianBlur stdDeviation="3" result="blur" />
                         <feMerge>
                           <feMergeNode in="blur" />
                           <feMergeNode in="SourceGraphic" />
@@ -1292,7 +1306,15 @@ export default function App() {
                       </filter>
 
                       <filter id="glow-indigo" x="-20%" y="-20%" width="140%" height="140%">
-                        <feGaussianBlur stdDeviation="2.5" result="blur" />
+                        <feGaussianBlur stdDeviation="3" result="blur" />
+                        <feMerge>
+                          <feMergeNode in="blur" />
+                          <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                      </filter>
+
+                      <filter id="glow-amber" x="-20%" y="-20%" width="140%" height="140%">
+                        <feGaussianBlur stdDeviation="3" result="blur" />
                         <feMerge>
                           <feMergeNode in="blur" />
                           <feMergeNode in="SourceGraphic" />
@@ -1300,35 +1322,40 @@ export default function App() {
                       </filter>
                     </defs>
 
-                    {/* Vertical Subtle Dashed Lane Guidelines */}
-                    <line x1="108" y1="20" x2="108" y2="430" stroke="#0e172a" strokeWidth="1" strokeDasharray="3 3" />
-                    <line x1="256" y1="20" x2="256" y2="430" stroke="#0e172a" strokeWidth="1" strokeDasharray="3 3" />
-                    <line x1="404" y1="20" x2="404" y2="430" stroke="#0e172a" strokeWidth="1" strokeDasharray="3 3" />
-                    <line x1="551" y1="20" x2="551" y2="430" stroke="#0e172a" strokeWidth="1" strokeDasharray="3 3" />
-                    <line x1="699" y1="20" x2="699" y2="430" stroke="#0e172a" strokeWidth="1" strokeDasharray="3 3" />
-                    <line x1="847" y1="20" x2="847" y2="430" stroke="#0e172a" strokeWidth="1" strokeDasharray="3 3" />
+                    {/* Column Lane Guides & Headers */}
+                    <line x1="137" y1="35" x2="137" y2="465" stroke="#0e172a" strokeWidth="1" strokeDasharray="3 3" />
+                    <line x1="367" y1="35" x2="367" y2="465" stroke="#0e172a" strokeWidth="1" strokeDasharray="3 3" />
+                    <line x1="607" y1="35" x2="607" y2="465" stroke="#0e172a" strokeWidth="1" strokeDasharray="3 3" />
+                    <line x1="827" y1="35" x2="827" y2="465" stroke="#0e172a" strokeWidth="1" strokeDasharray="3 3" />
+                    <line x1="1042" y1="35" x2="1042" y2="465" stroke="#0e172a" strokeWidth="1" strokeDasharray="3 3" />
+
+                    <text x="137" y="22" fill="#475569" fontSize="10" fontWeight="700" fontFamily="monospace" textAnchor="middle" letterSpacing="1">IDENTITY PRINCIPALS</text>
+                    <text x="367" y="22" fill="#475569" fontSize="10" fontWeight="700" fontFamily="monospace" textAnchor="middle" letterSpacing="1">ACTIVE SESSIONS</text>
+                    <text x="607" y="22" fill="#475569" fontSize="10" fontWeight="700" fontFamily="monospace" textAnchor="middle" letterSpacing="1">CLOUD ROLES &amp; STS</text>
+                    <text x="827" y="22" fill="#475569" fontSize="10" fontWeight="700" fontFamily="monospace" textAnchor="middle" letterSpacing="1">IAM POLICIES</text>
+                    <text x="1042" y="22" fill="#475569" fontSize="10" fontWeight="700" fontFamily="monospace" textAnchor="middle" letterSpacing="1">SENSITIVE RESOURCES</text>
 
                     {/* ========================================================
                         BACKGROUND EDGES (Benign Telemetry Curves)
                        ======================================================== */}
-                    {/* Identity Slot 1 -> Session Slot 2 */}
-                    <path d="M 306 131 L 329 133" fill="none" stroke="#0d9488" strokeWidth="1.2" opacity="0.35" markerEnd="url(#arrow-teal)" />
+                    {/* Identity Slot 1 (Alice) -> Session Slot 2 */}
+                    <path d="M 220 154 L 285 154" fill="none" stroke="#0d9488" strokeWidth="1.4" opacity="0.4" markerEnd="url(#arrow-teal)" />
                     {/* Session Slot 2 -> sts.amazonaws.com */}
-                    <path d="M 454 133 C 462 133, 456 211, 468 211" fill="none" stroke="#0d9488" strokeWidth="1.2" opacity="0.35" markerEnd="url(#arrow-teal)" />
-                    {/* sts.amazonaws.com -> Resource Slot 1 */}
-                    <path d="M 602 211 C 670 211, 710 162, 763 162" fill="none" stroke="#0d9488" strokeWidth="1.2" opacity="0.35" markerEnd="url(#arrow-teal)" />
-                    {/* sts.amazonaws.com -> Resource Slot 3 */}
-                    <path d="M 602 233 C 670 233, 710 283, 763 283" fill="none" stroke="#0d9488" strokeWidth="1.2" opacity="0.35" markerEnd="url(#arrow-teal)" />
+                    <path d="M 450 154 C 485 154, 485 238, 520 238" fill="none" stroke="#0d9488" strokeWidth="1.4" opacity="0.4" markerEnd="url(#arrow-teal)" />
+                    {/* sts.amazonaws.com -> Resource Slot 1 (corp-analytics-reports) */}
+                    <path d="M 695 238 C 785 238, 865 169, 955 169" fill="none" stroke="#0d9488" strokeWidth="1.4" opacity="0.4" markerEnd="url(#arrow-teal)" />
+                    {/* sts.amazonaws.com -> Resource Slot 3 (corp-dev-builds) */}
+                    <path d="M 695 260 C 785 260, 865 331, 955 331" fill="none" stroke="#0d9488" strokeWidth="1.4" opacity="0.4" markerEnd="url(#arrow-teal)" />
 
                     {/* ========================================================
                         ACTIVE ATTACK PATH ARROWS (Highlighted Step-by-Step)
                        ======================================================== */}
-                    {/* Arrow 1a: Active Identity -> Attacker Session (Active at Step 1+) */}
+                    {/* Arrow 1a: Active Identity (Bob) -> Attacker Session 1 (Active at Step 1+) */}
                     <path
-                      d="M 306 184 C 322 184, 314 72, 329 72"
+                      d="M 220 206 C 255 206, 255 90, 285 90"
                       fill="none"
                       stroke={simStep >= 1 ? '#ff2255' : '#7f1d1d'}
-                      strokeWidth={simStep >= 1 ? '3' : '1.5'}
+                      strokeWidth={simStep >= 1 ? '3.5' : '1.8'}
                       strokeDasharray={simStep >= 1 ? '8 4' : '5 3'}
                       markerEnd={simStep >= 1 ? 'url(#arrow-bright-red)' : 'url(#arrow-dim-red)'}
                       className={simStep >= 1 ? 'attack-arrow-active' : ''}
@@ -1336,12 +1363,12 @@ export default function App() {
                       opacity={simStep >= 1 ? 1 : 0.45}
                     />
 
-                    {/* Arrow 1b: Attacker Session -> Role/STS (Active at Step 2+) */}
+                    {/* Arrow 1b: Attacker Session 1 -> Role/STS (Active at Step 2+) */}
                     <path
-                      d="M 454 72 C 466 72, 452 211, 468 211"
+                      d="M 450 90 C 490 90, 485 230, 520 230"
                       fill="none"
                       stroke={simStep >= 2 ? '#ff2255' : '#7f1d1d'}
-                      strokeWidth={simStep >= 2 ? '3' : '1.5'}
+                      strokeWidth={simStep >= 2 ? '3.5' : '1.8'}
                       strokeDasharray={simStep >= 2 ? '8 4' : '5 3'}
                       markerEnd={simStep >= 2 ? 'url(#arrow-bright-red)' : 'url(#arrow-dim-red)'}
                       className={simStep >= 2 ? 'attack-arrow-active' : ''}
@@ -1351,20 +1378,10 @@ export default function App() {
 
                     {/* Arrow 1c: Lateral Session Probe -> Session Slot 3 (Active at Step 2+) */}
                     <path
-                      d="M 306 193 L 329 193"
+                      d="M 220 218 L 285 218"
                       fill="none"
                       stroke={simStep >= 2 ? '#ff4d4d' : '#450a0a'}
-                      strokeWidth={simStep >= 2 ? '2.4' : '1.2'}
-                      strokeDasharray="6 3"
-                      markerEnd={simStep >= 2 ? 'url(#arrow-bright-red)' : 'url(#arrow-dim-red)'}
-                      className={simStep >= 2 ? 'attack-arrow-active' : ''}
-                      opacity={simStep >= 2 ? 0.9 : 0.3}
-                    />
-                    <path
-                      d="M 454 193 L 468 218"
-                      fill="none"
-                      stroke={simStep >= 2 ? '#ff4d4d' : '#450a0a'}
-                      strokeWidth={simStep >= 2 ? '2.4' : '1.2'}
+                      strokeWidth={simStep >= 2 ? '2.6' : '1.3'}
                       strokeDasharray="6 3"
                       markerEnd={simStep >= 2 ? 'url(#arrow-bright-red)' : 'url(#arrow-dim-red)'}
                       className={simStep >= 2 ? 'attack-arrow-active' : ''}
@@ -1373,20 +1390,20 @@ export default function App() {
 
                     {/* Arrow 1d: Lateral Probes to lower sessions (Active at Step 2+) */}
                     <path
-                      d="M 306 198 C 320 198, 312 315, 329 315"
+                      d="M 220 226 C 255 226, 255 346, 285 346"
                       fill="none"
                       stroke={simStep >= 2 ? '#ff4d4d' : '#450a0a'}
-                      strokeWidth={simStep >= 2 ? '2' : '1.2'}
+                      strokeWidth={simStep >= 2 ? '2.2' : '1.3'}
                       strokeDasharray="5 3"
                       markerEnd={simStep >= 2 ? 'url(#arrow-bright-red)' : 'url(#arrow-dim-red)'}
                       className={simStep >= 2 ? 'attack-arrow-active' : ''}
                       opacity={simStep >= 2 ? 0.85 : 0.25}
                     />
                     <path
-                      d="M 306 202 C 320 202, 310 375, 329 375"
+                      d="M 220 230 C 255 230, 255 410, 285 410"
                       fill="none"
                       stroke={simStep >= 2 ? '#ff4d4d' : '#450a0a'}
-                      strokeWidth={simStep >= 2 ? '2' : '1.2'}
+                      strokeWidth={simStep >= 2 ? '2.2' : '1.3'}
                       strokeDasharray="5 3"
                       markerEnd={simStep >= 2 ? 'url(#arrow-bright-red)' : 'url(#arrow-dim-red)'}
                       className={simStep >= 2 ? 'attack-arrow-active' : ''}
@@ -1395,10 +1412,10 @@ export default function App() {
 
                     {/* Arrow 3: Role/STS -> Policy (Active at Step 3+) */}
                     <path
-                      d="M 602 222 L 615 222"
+                      d="M 695 250 L 740 250"
                       fill="none"
                       stroke={simStep >= 3 ? '#ff2255' : '#7f1d1d'}
-                      strokeWidth={simStep >= 3 ? '3.2' : '1.5'}
+                      strokeWidth={simStep >= 3 ? '3.5' : '1.8'}
                       strokeDasharray={simStep >= 3 ? '8 4' : '5 3'}
                       markerEnd={simStep >= 3 ? 'url(#arrow-bright-red)' : 'url(#arrow-dim-red)'}
                       className={simStep >= 3 ? 'attack-arrow-active' : ''}
@@ -1408,10 +1425,10 @@ export default function App() {
 
                     {/* Arrow 4: Policy -> Target Vault Resource (Active at Step 4+) */}
                     <path
-                      d="M 749 222 L 763 222"
+                      d="M 915 250 L 955 250"
                       fill="none"
                       stroke={simStep >= 4 ? '#ff1744' : '#7f1d1d'}
-                      strokeWidth={simStep >= 4 ? '3.5' : '1.5'}
+                      strokeWidth={simStep >= 4 ? '3.8' : '1.8'}
                       strokeDasharray={simStep >= 4 ? '8 4' : '5 3'}
                       markerEnd={simStep >= 4 ? 'url(#arrow-bright-red)' : 'url(#arrow-dim-red)'}
                       className={simStep >= 4 ? 'attack-arrow-active' : ''}
@@ -1420,11 +1437,11 @@ export default function App() {
                     />
 
                     {/* ========================================================
-                        COLUMN 1: IDENTITIES (Dynamic nodes)
+                        COLUMN 1: IDENTITIES (4 Nodes, Mathematically Aligned)
                        ======================================================== */}
-                    {/* 1.1: Identity Slot 1 */}
+                    {/* 1.1: Identity Slot 1 (Alice) */}
                     <g
-                      transform="translate(182, 111)"
+                      transform="translate(55, 130)"
                       className="cursor-pointer group"
                       onMouseEnter={() => setActiveBubble({
                         id: identitySlot1,
@@ -1437,16 +1454,16 @@ export default function App() {
                       })}
                       onMouseLeave={() => setActiveBubble(null)}
                     >
-                      <rect width="124" height="40" rx="6" fill="#09101d" stroke="#1b283d" strokeWidth="1" className="group-hover:stroke-cyan-500/50 transition-all" />
-                      <text x="10" y="17" fill="#cbd5e1" fontSize="10" fontWeight="bold" fontFamily="monospace">
-                        {formatIdentity(identitySlot1).slice(0, 16)}
+                      <rect width="165" height="48" rx="8" fill="#09101d" stroke="#1b283d" strokeWidth="1" className="group-hover:stroke-cyan-500/50 transition-all" />
+                      <text x="14" y="21" fill="#cbd5e1" fontSize="12" fontWeight="bold" fontFamily="monospace">
+                        {formatIdentity(identitySlot1).slice(0, 18)}
                       </text>
-                      <text x="10" y="30" fill="#64748b" fontSize="8" fontWeight="600" fontFamily="monospace">IDENTITY • NORMAL</text>
+                      <text x="14" y="36" fill="#64748b" fontSize="9.5" fontWeight="600" fontFamily="monospace">IDENTITY • NORMAL</text>
                     </g>
 
-                    {/* 1.2: Active Attacker Identity Slot 2 */}
+                    {/* 1.2: Active Attacker Identity Slot 2 (Bob) */}
                     <g
-                      transform="translate(182, 171)"
+                      transform="translate(55, 192)"
                       className="cursor-pointer group"
                       onMouseEnter={() => setActiveBubble({
                         id: hopIdentity,
@@ -1465,26 +1482,26 @@ export default function App() {
                       onMouseLeave={() => setActiveBubble(null)}
                     >
                       <rect
-                        width="124"
-                        height="42"
-                        rx="6"
-                        fill="#161b33"
+                        width="165"
+                        height="52"
+                        rx="8"
+                        fill="#121936"
                         stroke={simStep >= 1 ? '#ff2255' : '#6366f1'}
-                        strokeWidth={simStep >= 1 ? '2.4' : '2'}
+                        strokeWidth={simStep >= 1 ? '2.6' : '2'}
                         filter={simStep >= 1 ? 'url(#glow-arrow-red)' : 'url(#glow-indigo)'}
                         className="transition-all"
                       />
-                      <text x="10" y="18" fill="#ffffff" fontSize="10" fontWeight="bold" fontFamily="monospace">
-                        {formatIdentity(hopIdentity).slice(0, 16)}
+                      <text x="14" y="22" fill="#ffffff" fontSize="12" fontWeight="bold" fontFamily="monospace">
+                        {formatIdentity(hopIdentity).slice(0, 18)}
                       </text>
-                      <text x="10" y="31" fill={simStep >= 1 ? '#fca5a5' : '#a5b4fc'} fontSize="8" fontWeight="600" fontFamily="monospace">
+                      <text x="14" y="38" fill={simStep >= 1 ? '#fca5a5' : '#818cf8'} fontSize="9.5" fontWeight="bold" fontFamily="monospace">
                         IDENTITY • {simStep >= 1 ? 'COMPROMISED' : 'NORMAL'}
                       </text>
                     </g>
 
-                    {/* 1.3: Identity Slot 3 */}
+                    {/* 1.3: Identity Slot 3 (Charlie) */}
                     <g
-                      transform="translate(182, 233)"
+                      transform="translate(55, 258)"
                       className="cursor-pointer group"
                       onMouseEnter={() => setActiveBubble({
                         id: identitySlot3,
@@ -1497,16 +1514,16 @@ export default function App() {
                       })}
                       onMouseLeave={() => setActiveBubble(null)}
                     >
-                      <rect width="124" height="40" rx="6" fill="#09101d" stroke="#1b283d" strokeWidth="1" className="group-hover:stroke-cyan-500/50 transition-all" />
-                      <text x="10" y="17" fill="#cbd5e1" fontSize="10" fontWeight="bold" fontFamily="monospace">
-                        {formatIdentity(identitySlot3).slice(0, 16)}
+                      <rect width="165" height="48" rx="8" fill="#09101d" stroke="#1b283d" strokeWidth="1" className="group-hover:stroke-cyan-500/50 transition-all" />
+                      <text x="14" y="21" fill="#cbd5e1" fontSize="12" fontWeight="bold" fontFamily="monospace">
+                        {formatIdentity(identitySlot3).slice(0, 18)}
                       </text>
-                      <text x="10" y="30" fill="#64748b" fontSize="8" fontWeight="600" fontFamily="monospace">IDENTITY • NORMAL</text>
+                      <text x="14" y="36" fill="#64748b" fontSize="9.5" fontWeight="600" fontFamily="monospace">IDENTITY • NORMAL</text>
                     </g>
 
-                    {/* 1.4: Identity Slot 4 (Admin / Protected) */}
+                    {/* 1.4: Identity Slot 4 (Diana - Admin / Protected) */}
                     <g
-                      transform="translate(182, 293)"
+                      transform="translate(55, 322)"
                       className="cursor-pointer group"
                       onMouseEnter={() => setActiveBubble({
                         id: identitySlot4,
@@ -1519,19 +1536,19 @@ export default function App() {
                       })}
                       onMouseLeave={() => setActiveBubble(null)}
                     >
-                      <rect width="124" height="40" rx="6" fill="#18090d" stroke="#881337" strokeWidth="1.5" className="group-hover:stroke-rose-500 transition-all" />
-                      <text x="10" y="17" fill="#fecdd3" fontSize="10" fontWeight="bold" fontFamily="monospace">
-                        {formatIdentity(identitySlot4).slice(0, 16)}
+                      <rect width="165" height="48" rx="8" fill="#18090d" stroke="#881337" strokeWidth="1.6" className="group-hover:stroke-rose-500 transition-all" />
+                      <text x="14" y="21" fill="#fecdd3" fontSize="12" fontWeight="bold" fontFamily="monospace">
+                        {formatIdentity(identitySlot4).slice(0, 18)}
                       </text>
-                      <text x="10" y="30" fill="#f43f5e" fontSize="8" fontWeight="bold" fontFamily="monospace">IDENTITY • HIGH</text>
+                      <text x="14" y="36" fill="#f43f5e" fontSize="9.5" fontWeight="bold" fontFamily="monospace">IDENTITY • HIGH</text>
                     </g>
 
                     {/* ========================================================
-                        COLUMN 2: SESSIONS (Dynamic Session Nodes)
+                        COLUMN 2: SESSIONS (6 Nodes, Aligned Exactly to Rows)
                        ======================================================== */}
-                    {/* 2.1: Attacker Active Session */}
+                    {/* 2.1: Attacker Active Session 1 */}
                     <g
-                      transform="translate(329, 52)"
+                      transform="translate(285, 68)"
                       className="cursor-pointer group"
                       onMouseEnter={() => setActiveBubble({
                         id: sessionSlot1,
@@ -1545,73 +1562,73 @@ export default function App() {
                       onMouseLeave={() => setActiveBubble(null)}
                     >
                       <rect
-                        width="125"
-                        height="40"
-                        rx="6"
+                        width="165"
+                        height="44"
+                        rx="8"
                         fill="#0c1524"
                         stroke={simStep >= 2 ? '#ff2255' : '#1e293b'}
-                        strokeWidth={simStep >= 2 ? '2' : '1'}
+                        strokeWidth={simStep >= 2 ? '2.4' : '1'}
                         filter={simStep >= 2 ? 'url(#glow-arrow-red)' : undefined}
                         className="transition-all"
                       />
-                      <text x="10" y="17" fill="#ffffff" fontSize="10" fontWeight="bold" fontFamily="monospace">
-                        Session: {sessionSlot1.slice(0, 7)}..
+                      <text x="14" y="19" fill="#ffffff" fontSize="12" fontWeight="bold" fontFamily="monospace">
+                        Session: {sessionSlot1.slice(0, 8)}..
                       </text>
-                      <text x="10" y="30" fill={simStep >= 2 ? '#fca5a5' : '#64748b'} fontSize="8" fontWeight="600" fontFamily="monospace">
+                      <text x="14" y="33" fill={simStep >= 2 ? '#fca5a5' : '#64748b'} fontSize="9" fontWeight="bold" fontFamily="monospace">
                         SESSION • {simStep >= 2 ? 'HIJACKED' : 'NORMAL'}
                       </text>
                     </g>
 
-                    {/* 2.2: Session Slot 2 */}
-                    <g transform="translate(329, 113)" className="cursor-pointer group">
-                      <rect width="125" height="40" rx="6" fill="#080e18" stroke="#162032" strokeWidth="1" />
-                      <text x="10" y="17" fill="#94a3b8" fontSize="10" fontWeight="bold" fontFamily="monospace">
-                        Session: {sessionSlot2.slice(0, 7)}..
+                    {/* 2.2: Session Slot 2 (Aligned with Alice) */}
+                    <g transform="translate(285, 132)" className="cursor-pointer group">
+                      <rect width="165" height="44" rx="8" fill="#080e18" stroke="#162032" strokeWidth="1" />
+                      <text x="14" y="19" fill="#94a3b8" fontSize="12" fontWeight="bold" fontFamily="monospace">
+                        Session: {sessionSlot2.slice(0, 8)}..
                       </text>
-                      <text x="10" y="30" fill="#475569" fontSize="8" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
+                      <text x="14" y="33" fill="#475569" fontSize="9" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
                     </g>
 
-                    {/* 2.3: Session Slot 3 */}
-                    <g transform="translate(329, 173)" className="cursor-pointer group">
-                      <rect width="125" height="40" rx="6" fill="#080e18" stroke={simStep >= 2 ? '#f43f5e' : '#162032'} strokeWidth="1" />
-                      <text x="10" y="17" fill="#94a3b8" fontSize="10" fontWeight="bold" fontFamily="monospace">
-                        Session: {sessionSlot3.slice(0, 7)}..
+                    {/* 2.3: Session Slot 3 (Aligned with Bob) */}
+                    <g transform="translate(285, 196)" className="cursor-pointer group">
+                      <rect width="165" height="44" rx="8" fill="#080e18" stroke={simStep >= 2 ? '#f43f5e' : '#162032'} strokeWidth="1" />
+                      <text x="14" y="19" fill="#94a3b8" fontSize="12" fontWeight="bold" fontFamily="monospace">
+                        Session: {sessionSlot3.slice(0, 8)}..
                       </text>
-                      <text x="10" y="30" fill="#475569" fontSize="8" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
+                      <text x="14" y="33" fill="#475569" fontSize="9" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
                     </g>
 
-                    {/* 2.4: Session Slot 4 */}
-                    <g transform="translate(329, 234)" className="cursor-pointer group">
-                      <rect width="125" height="40" rx="6" fill="#080e18" stroke="#162032" strokeWidth="1" />
-                      <text x="10" y="17" fill="#94a3b8" fontSize="10" fontWeight="bold" fontFamily="monospace">
-                        Session: {sessionSlot4.slice(0, 7)}..
+                    {/* 2.4: Session Slot 4 (Aligned with Charlie) */}
+                    <g transform="translate(285, 260)" className="cursor-pointer group">
+                      <rect width="165" height="44" rx="8" fill="#080e18" stroke="#162032" strokeWidth="1" />
+                      <text x="14" y="19" fill="#94a3b8" fontSize="12" fontWeight="bold" fontFamily="monospace">
+                        Session: {sessionSlot4.slice(0, 8)}..
                       </text>
-                      <text x="10" y="30" fill="#475569" fontSize="8" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
+                      <text x="14" y="33" fill="#475569" fontSize="9" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
                     </g>
 
-                    {/* 2.5: Session Slot 5 */}
-                    <g transform="translate(329, 295)" className="cursor-pointer group">
-                      <rect width="125" height="40" rx="6" fill="#080e18" stroke="#162032" strokeWidth="1" />
-                      <text x="10" y="17" fill="#94a3b8" fontSize="10" fontWeight="bold" fontFamily="monospace">
-                        Session: {sessionSlot5.slice(0, 7)}..
+                    {/* 2.5: Session Slot 5 (Aligned with Diana) */}
+                    <g transform="translate(285, 324)" className="cursor-pointer group">
+                      <rect width="165" height="44" rx="8" fill="#080e18" stroke="#162032" strokeWidth="1" />
+                      <text x="14" y="19" fill="#94a3b8" fontSize="12" fontWeight="bold" fontFamily="monospace">
+                        Session: {sessionSlot5.slice(0, 8)}..
                       </text>
-                      <text x="10" y="30" fill="#475569" fontSize="8" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
+                      <text x="14" y="33" fill="#475569" fontSize="9" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
                     </g>
 
                     {/* 2.6: Session Slot 6 */}
-                    <g transform="translate(329, 355)" className="cursor-pointer group">
-                      <rect width="125" height="40" rx="6" fill="#080e18" stroke="#162032" strokeWidth="1" />
-                      <text x="10" y="17" fill="#94a3b8" fontSize="10" fontWeight="bold" fontFamily="monospace">
-                        Session: {sessionSlot6.slice(0, 7)}..
+                    <g transform="translate(285, 388)" className="cursor-pointer group">
+                      <rect width="165" height="44" rx="8" fill="#080e18" stroke="#162032" strokeWidth="1" />
+                      <text x="14" y="19" fill="#94a3b8" fontSize="12" fontWeight="bold" fontFamily="monospace">
+                        Session: {sessionSlot6.slice(0, 8)}..
                       </text>
-                      <text x="10" y="30" fill="#475569" fontSize="8" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
+                      <text x="14" y="33" fill="#475569" fontSize="9" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
                     </g>
 
                     {/* ========================================================
-                        COLUMN 3: ROLES & STS (Dynamic Role Node)
+                        COLUMN 3: ROLES & STS (Center Node)
                        ======================================================== */}
                     <g
-                      transform="translate(468, 201)"
+                      transform="translate(520, 222)"
                       className="cursor-pointer group"
                       onMouseEnter={() => setActiveBubble({
                         id: hopRole,
@@ -1631,27 +1648,28 @@ export default function App() {
                       onMouseLeave={() => setActiveBubble(null)}
                     >
                       <rect
-                        width="134"
-                        height="42"
-                        rx="7"
-                        fill="#451a03"
-                        stroke={simStep >= 3 ? '#fbbf24' : '#f59e0b'}
-                        strokeWidth={simStep >= 3 ? '2.4' : '2'}
+                        width="175"
+                        height="56"
+                        rx="8"
+                        fill="#3d1703"
+                        stroke={simStep >= 3 ? '#fbbf24' : '#ea580c'}
+                        strokeWidth={simStep >= 3 ? '2.6' : '2'}
+                        filter={simStep >= 3 ? 'url(#glow-amber)' : undefined}
                         className="transition-all"
                       />
-                      <text x="10" y="18" fill="#ffffff" fontSize="10" fontWeight="bold" fontFamily="monospace">
-                        {hopRole.slice(0, 16)}
+                      <text x="14" y="24" fill="#ffffff" fontSize="12.5" fontWeight="bold" fontFamily="monospace">
+                        {hopRole.slice(0, 18)}
                       </text>
-                      <text x="10" y="31" fill="#fcd34d" fontSize="8" fontWeight="bold" fontFamily="monospace">
+                      <text x="14" y="42" fill="#fb923c" fontSize="9.5" fontWeight="bold" fontFamily="monospace">
                         ROLE • MEDIUM
                       </text>
                     </g>
 
                     {/* ========================================================
-                        COLUMN 4: POLICIES (Dynamic Policy Node)
+                        COLUMN 4: POLICIES (IAM Policies)
                        ======================================================== */}
                     <g
-                      transform="translate(615, 202)"
+                      transform="translate(740, 222)"
                       className="cursor-pointer group"
                       onMouseEnter={() => setActiveBubble({
                         id: hopPolicy,
@@ -1670,37 +1688,37 @@ export default function App() {
                       onMouseLeave={() => setActiveBubble(null)}
                     >
                       <rect
-                        width="134"
-                        height="41"
-                        rx="7"
-                        fill="#0b1322"
-                        stroke={simStep >= 4 ? '#38bdf8' : '#1e3a5f'}
-                        strokeWidth={simStep >= 4 ? '2.2' : '1.5'}
+                        width="175"
+                        height="56"
+                        rx="8"
+                        fill="#0a1526"
+                        stroke={simStep >= 4 ? '#38bdf8' : '#0284c7'}
+                        strokeWidth={simStep >= 4 ? '2.4' : '1.8'}
                         className="transition-all"
                       />
-                      <text x="10" y="18" fill="#ffffff" fontSize="10" fontWeight="bold" fontFamily="monospace">
-                        {hopPolicy.replace('arn:aws:iam::aws:policy/', '').slice(0, 16)}
+                      <text x="14" y="24" fill="#ffffff" fontSize="12.5" fontWeight="bold" fontFamily="monospace">
+                        {hopPolicy.replace('arn:aws:iam::aws:policy/', '').slice(0, 18)}
                       </text>
-                      <text x="10" y="31" fill="#7dd3fc" fontSize="8" fontWeight="bold" fontFamily="monospace">
+                      <text x="14" y="42" fill="#38bdf8" fontSize="9.5" fontWeight="bold" fontFamily="monospace">
                         POLICY • MEDIUM
                       </text>
                     </g>
 
                     {/* ========================================================
-                        COLUMN 5: TARGET RESOURCES (Dynamic Resource Nodes)
+                        COLUMN 5: TARGET RESOURCES (Sensitive Resources)
                        ======================================================== */}
                     {/* 5.1: Resource Slot 1 */}
-                    <g transform="translate(763, 142)" className="cursor-pointer group">
-                      <rect width="134" height="40" rx="6" fill="#061a14" stroke="#065f46" strokeWidth="1" />
-                      <text x="10" y="17" fill="#cbd5e1" fontSize="10" fontWeight="bold" fontFamily="monospace">
-                        {resourceSlot1.slice(0, 16)}
+                    <g transform="translate(955, 145)" className="cursor-pointer group">
+                      <rect width="175" height="48" rx="8" fill="#051914" stroke="#0d9488" strokeWidth="1" />
+                      <text x="14" y="21" fill="#cbd5e1" fontSize="12" fontWeight="bold" fontFamily="monospace">
+                        {resourceSlot1.slice(0, 18)}
                       </text>
-                      <text x="10" y="30" fill="#34d399" fontSize="8" fontWeight="600" fontFamily="monospace">RESOURCE • NORMAL</text>
+                      <text x="14" y="36" fill="#34d399" fontSize="9.5" fontWeight="600" fontFamily="monospace">RESOURCE • NORMAL</text>
                     </g>
 
-                    {/* 5.2: Exfiltration Target Resource Slot 2 */}
+                    {/* 5.2: Exfiltration Target Resource Slot 2 (Critical Vault - Bright Red) */}
                     <g
-                      transform="translate(763, 202)"
+                      transform="translate(955, 222)"
                       className="cursor-pointer group"
                       onMouseEnter={() => setActiveBubble({
                         id: hopResource,
@@ -1719,37 +1737,38 @@ export default function App() {
                       onMouseLeave={() => setActiveBubble(null)}
                     >
                       <rect
-                        width="134"
-                        height="41"
-                        rx="7"
-                        fill="#450a0a"
+                        width="175"
+                        height="56"
+                        rx="8"
+                        fill="#3d0709"
                         stroke={simStep >= 5 ? '#ff1744' : '#ef4444'}
-                        strokeWidth={simStep >= 5 ? '2.5' : '1.8'}
+                        strokeWidth={simStep >= 5 ? '2.8' : '2'}
+                        filter={simStep >= 5 ? 'url(#glow-arrow-red)' : undefined}
                         className="transition-all"
                       />
-                      <text x="10" y="18" fill="#ffffff" fontSize="10" fontWeight="bold" fontFamily="monospace">
-                        {hopResource.slice(0, 16)}
+                      <text x="14" y="24" fill="#ffffff" fontSize="12.5" fontWeight="bold" fontFamily="monospace">
+                        {hopResource.slice(0, 18)}
                       </text>
-                      <text x="10" y="31" fill="#fca5a5" fontSize="8" fontWeight="bold" fontFamily="monospace">
+                      <text x="14" y="42" fill="#fca5a5" fontSize="9.5" fontWeight="bold" fontFamily="monospace">
                         RESOURCE • HIGH
                       </text>
                     </g>
 
                     {/* 5.3: Resource Slot 3 */}
-                    <g transform="translate(763, 263)" className="cursor-pointer group">
-                      <rect width="134" height="40" rx="6" fill="#061a14" stroke="#065f46" strokeWidth="1" />
-                      <text x="10" y="17" fill="#cbd5e1" fontSize="10" fontWeight="bold" fontFamily="monospace">
-                        {resourceSlot3.slice(0, 16)}
+                    <g transform="translate(955, 307)" className="cursor-pointer group">
+                      <rect width="175" height="48" rx="8" fill="#051914" stroke="#0d9488" strokeWidth="1" />
+                      <text x="14" y="21" fill="#cbd5e1" fontSize="12" fontWeight="bold" fontFamily="monospace">
+                        {resourceSlot3.slice(0, 18)}
                       </text>
-                      <text x="10" y="30" fill="#34d399" fontSize="8" fontWeight="600" fontFamily="monospace">RESOURCE • NORMAL</text>
+                      <text x="14" y="36" fill="#34d399" fontSize="9.5" fontWeight="600" fontFamily="monospace">RESOURCE • NORMAL</text>
                     </g>
 
                     {/* Zero Trust Containment Shield Overlay when Step 6 reached */}
                     {simStep >= 6 && (
-                      <g transform="translate(412, 16)">
-                        <rect x="0" y="0" width="200" height="28" rx="6" fill="#03180f" stroke="#10b981" strokeWidth="1.6" />
-                        <text x="100" y="18" fill="#6ee7b7" fontSize="10" fontWeight="bold" fontFamily="monospace" textAnchor="middle">
-                          🛡️ REVOKE_SESSION ENFORCED
+                      <g transform="translate(440, 14)">
+                        <rect x="0" y="0" width="300" height="30" rx="8" fill="#03180f" stroke="#10b981" strokeWidth="2" />
+                        <text x="150" y="19" fill="#34d399" fontSize="11" fontWeight="bold" fontFamily="monospace" textAnchor="middle">
+                          🛡️ ZERO TRUST REVOCATION ENFORCED
                         </text>
                       </g>
                     )}
@@ -2392,8 +2411,10 @@ export default function App() {
 
         {/* ==============================================================
             RIGHT COLUMN: Live Activity Feed (Okta & CloudTrail Stream)
+            (Hidden on 'graph' tab so the Live Attack Graph takes the full right portion)
            ============================================================== */}
-        <aside className="w-80 shrink-0 border-l border-[#16161e] bg-[#050508] flex flex-col p-4 space-y-3.5 overflow-hidden">
+        {(activeTab !== 'graph' || showFeedOnGraph) && (
+          <aside className="w-80 shrink-0 border-l border-[#16161e] bg-[#050508] flex flex-col p-4 space-y-3.5 overflow-hidden">
           <div className="flex items-center justify-between pb-2 border-b border-[#181822]">
             <div>
               <h3 className="text-xs font-bold uppercase tracking-wider text-white font-mono flex items-center space-x-1.5">
@@ -2476,6 +2497,7 @@ export default function App() {
             )}
           </div>
         </aside>
+        )}
       </div>
     </div>
   )
