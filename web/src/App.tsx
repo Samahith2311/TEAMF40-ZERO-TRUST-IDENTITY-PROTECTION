@@ -873,28 +873,28 @@ export default function App() {
 
           {/* --- TAB 2: LIVE ATTACK GRAPH (Interactive Swimlane Kill-Chain DAG) --- */}
           {activeTab === 'graph' && (
-            <div className="space-y-4">
-              <div className="p-5 border border-[#1c1c26] rounded-2xl bg-[#08080c] space-y-4 shadow-sm">
+            <div className="space-y-3">
+              <div className="p-4 border border-[#1c1c26] rounded-2xl bg-[#08080c] space-y-3 shadow-sm">
                 {/* Header & Controls */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-2 border-b border-[#161622]">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-2.5 pb-2 border-b border-[#161622]">
                   <div>
-                    <h2 className="text-base font-bold text-white flex items-center space-x-2">
-                      <span>Live Attack Graph & Kill-Chain DAG</span>
+                    <h2 className="text-sm font-bold text-white flex items-center space-x-2">
+                      <span>Live Attack Graph &amp; Kill-Chain DAG</span>
                       <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${
                         isSimulating ? 'bg-rose-950 text-rose-300 border border-rose-800/60 animate-pulse' : 'bg-[#061710] text-emerald-300 border border-emerald-800/40'
                       }`}>
                         {isSimulating ? '● SIMULATING ATTACK' : 'LIVE TELEMETRY'}
                       </span>
                     </h2>
-                    <p className="text-xs text-zinc-400">
-                      Multi-stage identity privilege graph: Authentication → Token Continuity → STS Role → Policy Escalation → Vault Exfiltration
+                    <p className="text-[11px] text-zinc-400">
+                      Sequential attack propagation: Infiltration → Token Abuse → STS Role Assumption → IAM Privilege Escalation → Vault Exfiltration
                     </p>
                   </div>
 
-                  <div className="flex items-center space-x-3 text-xs font-mono">
+                  <div className="flex items-center space-x-2.5 text-xs font-mono">
                     {/* Incident Selector */}
-                    <div className="flex items-center space-x-2">
-                      <span className="text-zinc-400">Incident:</span>
+                    <div className="flex items-center space-x-1.5">
+                      <span className="text-zinc-400 text-[11px]">Incident:</span>
                       <select
                         value={selectedAlert?.alert_id || ''}
                         onChange={e => {
@@ -904,7 +904,7 @@ export default function App() {
                             resetAttackSimulation()
                           }
                         }}
-                        className="bg-[#101016] border border-[#222230] text-zinc-200 text-xs rounded-lg px-2.5 py-1.5 font-mono outline-none cursor-pointer"
+                        className="bg-[#101016] border border-[#222230] text-zinc-200 text-xs rounded-lg px-2 py-1 font-mono outline-none cursor-pointer"
                       >
                         {alerts.map(a => (
                           <option key={a.alert_id} value={a.alert_id}>
@@ -915,7 +915,7 @@ export default function App() {
                     </div>
 
                     {/* Simulation Playback Controls */}
-                    <div className="flex items-center space-x-1.5 bg-[#0e0e16] p-1 rounded-xl border border-[#1e1e2c]">
+                    <div className="flex items-center space-x-1 bg-[#0e0e16] p-1 rounded-xl border border-[#1e1e2c]">
                       {isSimulating ? (
                         <button
                           onClick={stopAttackSimulation}
@@ -943,7 +943,7 @@ export default function App() {
                 </div>
 
                 {/* Simulation Step Progress & Narrative Telemetry Ticker */}
-                <div className="p-3 rounded-xl border border-[#181826] bg-[#060810] space-y-2 font-mono">
+                <div className="p-2.5 rounded-xl border border-[#181826] bg-[#060810] space-y-2 font-mono">
                   <div className="flex items-center justify-between text-xs">
                     <div className="flex items-center space-x-2">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
@@ -952,15 +952,15 @@ export default function App() {
                         simStep === 2 ? 'bg-rose-950 text-rose-300 border border-rose-700/50' :
                         simStep === 3 ? 'bg-amber-950 text-amber-300 border border-amber-700/50' :
                         simStep === 4 ? 'bg-sky-950 text-sky-300 border border-sky-700/50' :
-                        simStep === 5 ? 'bg-red-950 text-red-200 border border-red-700/60 animate-pulse' :
+                        simStep === 5 ? 'bg-red-950 text-red-200 border border-red-700/60' :
                         'bg-emerald-950 text-emerald-300 border border-emerald-700/50'
                       }`}>
-                        {simStep === 0 && '⚪ IDLE • Click Play to Simulate'}
-                        {simStep === 1 && '🚨 STEP 1/5: INFILTRATION'}
-                        {simStep === 2 && '⚡ STEP 2/5: TOKEN ABUSE'}
-                        {simStep === 3 && '🔑 STEP 3/5: STS ROLE ASSUME'}
-                        {simStep === 4 && '⚡ STEP 4/5: IAM PRIVILEGE ESCALATION'}
-                        {simStep === 5 && '🛑 STEP 5/5: VAULT DATA EXFILTRATION'}
+                        {simStep === 0 && '⚪ IDLE • Click Play to Highlight Attack Arrows'}
+                        {simStep === 1 && '🚨 STEP 1/5: INFILTRATION ARROW'}
+                        {simStep === 2 && '⚡ STEP 2/5: TOKEN ABUSE & STS ARROWS'}
+                        {simStep === 3 && '🔑 STEP 3/5: STS ROLE ARROW'}
+                        {simStep === 4 && '⚡ STEP 4/5: PRIVILEGE ESCALATION ARROW'}
+                        {simStep === 5 && '🛑 STEP 5/5: VAULT EXFILTRATION ARROW'}
                         {simStep === 6 && '🛡️ STEP 6: ZERO TRUST CONTAINMENT'}
                       </span>
 
@@ -998,17 +998,17 @@ export default function App() {
                   </div>
 
                   {/* Narrative Ticker Message */}
-                  <div className="text-xs text-zinc-300 bg-[#090d16] p-2.5 rounded-lg border border-[#141b2a] flex items-center justify-between">
+                  <div className="text-xs text-zinc-300 bg-[#090d16] p-2 rounded-lg border border-[#141b2a] flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <span className="text-cyan-400 font-bold">▶</span>
                       <span>
-                        {simStep === 0 && 'Ready. Generate a synthetic attack or click "Play Simulation" to execute the real-time kill-chain progression.'}
-                        {simStep === 1 && `Compromised credentials authenticated in Okta System Log. Inactivity delta breached; anomalous IP detected.`}
-                        {simStep === 2 && `Bearer token assumed. Browser-to-SDK transition detected with anomalous IP roaming across internal sessions.`}
-                        {simStep === 3 && `AWS STS AssumeRole API invoked. Principal acquired temporary cross-account cloud STS credentials.`}
-                        {simStep === 4 && `IAM privilege escalation verified. Policy 'AdministratorAccess' illicitly attached to contractor principal.`}
-                        {simStep === 5 && `CRITICAL ALERT: Unauthorized s3:GetObject dispatched against customer financial vault ('corp-customer-pii-vault')!`}
-                        {simStep === 6 && `CONTAINMENT ENFORCED: Zero Trust policy auto-executed REVOKE_SESSION. STS tokens purged and session access terminated.`}
+                        {simStep === 0 && 'Ready. Generate a synthetic attack or click "Play Simulation" to highlight attack vectors step-by-step.'}
+                        {simStep === 1 && `[Arrow 1 Highlighted] Compromised credentials authenticated in Okta System Log. Anomaly flag: Dormant account reactivation / Impossible travel.`}
+                        {simStep === 2 && `[Arrow 2 Highlighted] Bearer token assumed. Browser-to-SDK transition detected with anomalous IP roaming across internal sessions.`}
+                        {simStep === 3 && `[Arrow 3 Highlighted] AWS STS AssumeRole API invoked. Principal acquired temporary cross-account cloud STS credentials.`}
+                        {simStep === 4 && `[Arrow 4 Highlighted] IAM privilege escalation verified. Policy 'AdministratorAccess' illicitly attached to contractor principal.`}
+                        {simStep === 5 && `[Arrow 5 Highlighted] CRITICAL ALERT: Unauthorized s3:GetObject dispatched against customer financial vault ('corp-customer-pii-vault')!`}
+                        {simStep === 6 && `[CONTAINMENT ENFORCED] Zero Trust policy auto-executed REVOKE_SESSION. STS tokens purged and session access terminated.`}
                       </span>
                     </div>
 
@@ -1020,30 +1020,51 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* SVG Graph Canvas with 5-Lane DAG Layout matching user spec */}
-                <div className="relative w-full bg-[#030611] border border-[#161c2c] rounded-2xl p-4 min-h-[430px] flex items-center justify-center overflow-x-auto shadow-inner">
-                  <svg viewBox="0 0 970 410" className="w-full h-[400px] min-w-[940px]">
+                {/* SVG Graph Canvas - Fitted 100% to box with NO horizontal scrolling and NO rotating boxes */}
+                <div className="relative w-full bg-[#030611] border border-[#161c2c] rounded-2xl p-2.5 flex items-center justify-center shadow-inner overflow-hidden">
+                  <svg
+                    viewBox="0 0 960 300"
+                    className="w-full h-auto max-h-[360px]"
+                    preserveAspectRatio="xMidYMid meet"
+                  >
                     <defs>
-                      <marker id="arrow-red" viewBox="0 0 10 10" refX="22" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#ff4d4d" />
-                      </marker>
-                      <marker id="arrow-teal" viewBox="0 0 10 10" refX="22" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#14b8a6" />
-                      </marker>
-                      <marker id="arrow-amber" viewBox="0 0 10 10" refX="22" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#f59e0b" />
+                      <style>{`
+                        @keyframes flowDash {
+                          from { stroke-dashoffset: 24; }
+                          to { stroke-dashoffset: 0; }
+                        }
+                        .attack-arrow-active {
+                          stroke-dasharray: 8 4;
+                          animation: flowDash 0.8s linear infinite;
+                        }
+                      `}</style>
+
+                      {/* Inactive Muted Arrow Marker */}
+                      <marker id="arrow-dim-red" viewBox="0 0 10 10" refX="22" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#7f1d1d" opacity="0.6" />
                       </marker>
 
-                      <filter id="glow-red" x="-30%" y="-30%" width="160%" height="160%">
-                        <feGaussianBlur stdDeviation="4" result="blur" />
+                      {/* Active Highlighted Glowing Red Arrow Marker */}
+                      <marker id="arrow-bright-red" viewBox="0 0 10 10" refX="22" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#ff2255" />
+                      </marker>
+
+                      {/* Benign Background Edge Arrow Marker */}
+                      <marker id="arrow-teal" viewBox="0 0 10 10" refX="22" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#0d9488" opacity="0.5" />
+                      </marker>
+
+                      {/* Glow Filter for Active Arrows */}
+                      <filter id="glow-arrow-red" x="-20%" y="-20%" width="140%" height="140%">
+                        <feGaussianBlur stdDeviation="2.5" result="blur" />
                         <feMerge>
                           <feMergeNode in="blur" />
                           <feMergeNode in="SourceGraphic" />
                         </feMerge>
                       </filter>
 
-                      <filter id="glow-indigo" x="-30%" y="-30%" width="160%" height="160%">
-                        <feGaussianBlur stdDeviation="3.5" result="blur" />
+                      <filter id="glow-indigo" x="-20%" y="-20%" width="140%" height="140%">
+                        <feGaussianBlur stdDeviation="2.5" result="blur" />
                         <feMerge>
                           <feMergeNode in="blur" />
                           <feMergeNode in="SourceGraphic" />
@@ -1052,118 +1073,115 @@ export default function App() {
                     </defs>
 
                     {/* Vertical Dashed Lane Dividers */}
-                    <line x1="205" y1="12" x2="205" y2="395" stroke="#131e33" strokeWidth="1" strokeDasharray="4 4" />
-                    <line x1="405" y1="12" x2="405" y2="395" stroke="#131e33" strokeWidth="1" strokeDasharray="4 4" />
-                    <line x1="595" y1="12" x2="595" y2="395" stroke="#131e33" strokeWidth="1" strokeDasharray="4 4" />
-                    <line x1="775" y1="12" x2="775" y2="395" stroke="#131e33" strokeWidth="1" strokeDasharray="4 4" />
+                    <line x1="185" y1="8" x2="185" y2="292" stroke="#131e33" strokeWidth="1" strokeDasharray="4 4" />
+                    <line x1="375" y1="8" x2="375" y2="292" stroke="#131e33" strokeWidth="1" strokeDasharray="4 4" />
+                    <line x1="567" y1="8" x2="567" y2="292" stroke="#131e33" strokeWidth="1" strokeDasharray="4 4" />
+                    <line x1="757" y1="8" x2="757" y2="292" stroke="#131e33" strokeWidth="1" strokeDasharray="4 4" />
 
                     {/* Column Lane Header Labels */}
-                    <text x="112" y="20" fill="#475569" fontSize="10" fontWeight="bold" fontFamily="monospace" textAnchor="middle" letterSpacing="0.1em">IDENTITIES</text>
-                    <text x="305" y="20" fill="#475569" fontSize="10" fontWeight="bold" fontFamily="monospace" textAnchor="middle" letterSpacing="0.1em">SESSIONS</text>
-                    <text x="500" y="20" fill="#475569" fontSize="10" fontWeight="bold" fontFamily="monospace" textAnchor="middle" letterSpacing="0.1em">ROLES &amp; STS</text>
-                    <text x="685" y="20" fill="#475569" fontSize="10" fontWeight="bold" fontFamily="monospace" textAnchor="middle" letterSpacing="0.1em">POLICIES</text>
-                    <text x="872" y="20" fill="#475569" fontSize="10" fontWeight="bold" fontFamily="monospace" textAnchor="middle" letterSpacing="0.1em">TARGET RESOURCES</text>
+                    <text x="89" y="18" fill="#475569" fontSize="9.5" fontWeight="bold" fontFamily="monospace" textAnchor="middle" letterSpacing="0.1em">IDENTITIES</text>
+                    <text x="279" y="18" fill="#475569" fontSize="9.5" fontWeight="bold" fontFamily="monospace" textAnchor="middle" letterSpacing="0.1em">SESSIONS</text>
+                    <text x="471" y="18" fill="#475569" fontSize="9.5" fontWeight="bold" fontFamily="monospace" textAnchor="middle" letterSpacing="0.1em">ROLES &amp; STS</text>
+                    <text x="661" y="18" fill="#475569" fontSize="9.5" fontWeight="bold" fontFamily="monospace" textAnchor="middle" letterSpacing="0.1em">POLICIES</text>
+                    <text x="851" y="18" fill="#475569" fontSize="9.5" fontWeight="bold" fontFamily="monospace" textAnchor="middle" letterSpacing="0.1em">TARGET RESOURCES</text>
 
                     {/* ========================================================
                         BACKGROUND EDGES (Benign Telemetry Curves)
                        ======================================================== */}
                     {/* Alice -> Session: sess-ch */}
-                    <path d="M 185 95 C 210 95, 210 115, 235 115" fill="none" stroke="#134e4a" strokeWidth="1.3" opacity="0.45" markerEnd="url(#arrow-teal)" />
+                    <path d="M 160 60 C 185 60, 185 91, 212 91" fill="none" stroke="#0d9488" strokeWidth="1.2" opacity="0.35" markerEnd="url(#arrow-teal)" />
                     {/* Session: sess-ch -> sts.amazonaws.com */}
-                    <path d="M 380 115 C 410 115, 400 190, 430 190" fill="none" stroke="#134e4a" strokeWidth="1.3" opacity="0.45" markerEnd="url(#arrow-teal)" />
+                    <path d="M 350 91 C 380 91, 380 140, 402 140" fill="none" stroke="#0d9488" strokeWidth="1.2" opacity="0.35" markerEnd="url(#arrow-teal)" />
                     {/* sts.amazonaws.com -> corp-analytics-r.. */}
-                    <path d="M 575 190 C 670 190, 710 130, 795 130" fill="none" stroke="#134e4a" strokeWidth="1.3" opacity="0.45" markerEnd="url(#arrow-teal)" />
+                    <path d="M 544 140 C 640 140, 680 89, 782 89" fill="none" stroke="#0d9488" strokeWidth="1.2" opacity="0.35" markerEnd="url(#arrow-teal)" />
                     {/* sts.amazonaws.com -> corp-dev-builds */}
-                    <path d="M 575 205 C 670 205, 710 270, 795 270" fill="none" stroke="#134e4a" strokeWidth="1.3" opacity="0.45" markerEnd="url(#arrow-teal)" />
+                    <path d="M 544 150 C 640 150, 680 207, 782 207" fill="none" stroke="#0d9488" strokeWidth="1.2" opacity="0.35" markerEnd="url(#arrow-teal)" />
 
                     {/* ========================================================
-                        ACTIVE ATTACK PATH EDGES (Red Dashed Animated Curves)
+                        ACTIVE ATTACK PATH ARROWS (Highlighted Step-by-Step)
                        ======================================================== */}
-                    {/* Hop 1: Bob -> Session: bob-ses */}
+                    {/* Arrow 1: Identity -> Session: bob-ses (Active at Step 1+) */}
                     <path
-                      id="sim-path-1"
-                      d="M 185 160 C 215 160, 205 55, 235 55"
+                      d="M 160 115 C 190 115, 180 49, 212 49"
                       fill="none"
-                      stroke="#ff4d4d"
-                      strokeWidth={simStep >= 1 ? "2.6" : "2"}
-                      strokeDasharray="6 4"
-                      markerEnd="url(#arrow-red)"
-                      className={simStep >= 1 ? "animate-pulse" : ""}
+                      stroke={simStep >= 1 ? '#ff2255' : '#7f1d1d'}
+                      strokeWidth={simStep >= 1 ? '3' : '1.5'}
+                      strokeDasharray={simStep >= 1 ? '8 4' : '5 3'}
+                      markerEnd={simStep >= 1 ? 'url(#arrow-bright-red)' : 'url(#arrow-dim-red)'}
+                      className={simStep >= 1 ? 'attack-arrow-active' : ''}
+                      filter={simStep >= 1 ? 'url(#glow-arrow-red)' : undefined}
+                      opacity={simStep >= 1 ? 1 : 0.45}
                     />
 
-                    {/* Hop 1b: Branching Token Abuse / Probe -> Session: sess-di */}
+                    {/* Arrow 1b: Branching Token Probe -> Session: sess-di (Active at Step 2+) */}
                     <path
-                      d="M 185 160 C 210 160, 210 175, 235 175"
+                      d="M 160 115 C 185 115, 185 133, 212 133"
                       fill="none"
-                      stroke="#ff4d4d"
-                      strokeWidth="2"
-                      strokeDasharray="6 4"
-                      markerEnd="url(#arrow-red)"
-                      opacity={simStep >= 2 ? "1" : "0.75"}
+                      stroke={simStep >= 2 ? '#ff4d4d' : '#450a0a'}
+                      strokeWidth={simStep >= 2 ? '2.4' : '1.2'}
+                      strokeDasharray="6 3"
+                      markerEnd={simStep >= 2 ? 'url(#arrow-bright-red)' : 'url(#arrow-dim-red)'}
+                      className={simStep >= 2 ? 'attack-arrow-active' : ''}
+                      opacity={simStep >= 2 ? 0.9 : 0.3}
                     />
 
-                    {/* Hop 1c: Lateral Session Probes downward */}
+                    {/* Arrow 1c: Lateral Session Probes downward (Active at Step 2+) */}
                     <path
-                      d="M 185 160 C 210 160, 205 295, 235 295"
+                      d="M 160 115 C 185 115, 175 217, 212 217"
                       fill="none"
-                      stroke="#ff4d4d"
-                      strokeWidth="1.8"
+                      stroke={simStep >= 2 ? '#ff4d4d' : '#450a0a'}
+                      strokeWidth={simStep >= 2 ? '2' : '1.2'}
                       strokeDasharray="5 3"
-                      markerEnd="url(#arrow-red)"
-                      opacity={simStep >= 2 ? "0.9" : "0.55"}
-                    />
-                    <path
-                      d="M 185 160 C 210 160, 205 355, 235 355"
-                      fill="none"
-                      stroke="#ff4d4d"
-                      strokeWidth="1.8"
-                      strokeDasharray="5 3"
-                      markerEnd="url(#arrow-red)"
-                      opacity={simStep >= 2 ? "0.9" : "0.55"}
+                      markerEnd={simStep >= 2 ? 'url(#arrow-bright-red)' : 'url(#arrow-dim-red)'}
+                      className={simStep >= 2 ? 'attack-arrow-active' : ''}
+                      opacity={simStep >= 2 ? 0.85 : 0.25}
                     />
 
-                    {/* Hop 2: Session: bob-ses -> sts.amazonaws.com */}
+                    {/* Arrow 2: Session: bob-ses -> sts.amazonaws.com (Active at Step 2+) */}
                     <path
-                      id="sim-path-2"
-                      d="M 380 55 C 420 55, 390 190, 430 190"
+                      d="M 350 49 C 385 49, 375 140, 402 140"
                       fill="none"
-                      stroke="#ff4d4d"
-                      strokeWidth={simStep >= 2 ? "2.6" : "2"}
-                      strokeDasharray="6 4"
-                      markerEnd="url(#arrow-red)"
-                      className={simStep >= 2 ? "animate-pulse" : ""}
+                      stroke={simStep >= 2 ? '#ff2255' : '#7f1d1d'}
+                      strokeWidth={simStep >= 2 ? '3' : '1.5'}
+                      strokeDasharray={simStep >= 2 ? '8 4' : '5 3'}
+                      markerEnd={simStep >= 2 ? 'url(#arrow-bright-red)' : 'url(#arrow-dim-red)'}
+                      className={simStep >= 2 ? 'attack-arrow-active' : ''}
+                      filter={simStep >= 2 ? 'url(#glow-arrow-red)' : undefined}
+                      opacity={simStep >= 2 ? 1 : 0.45}
                     />
 
-                    {/* Hop 3: sts.amazonaws.com -> arn:aws:iam::aws.. */}
+                    {/* Arrow 3: sts.amazonaws.com -> arn:aws:iam::aws.. (Active at Step 3+) */}
                     <path
-                      id="sim-path-3"
-                      d="M 575 198 L 615 198"
+                      d="M 544 147 L 592 147"
                       fill="none"
-                      stroke="#ff4d4d"
-                      strokeWidth={simStep >= 3 ? "2.8" : "2"}
-                      strokeDasharray="6 4"
-                      markerEnd="url(#arrow-red)"
-                      className={simStep >= 3 ? "animate-pulse" : ""}
+                      stroke={simStep >= 3 ? '#ff2255' : '#7f1d1d'}
+                      strokeWidth={simStep >= 3 ? '3.2' : '1.5'}
+                      strokeDasharray={simStep >= 3 ? '8 4' : '5 3'}
+                      markerEnd={simStep >= 3 ? 'url(#arrow-bright-red)' : 'url(#arrow-dim-red)'}
+                      className={simStep >= 3 ? 'attack-arrow-active' : ''}
+                      filter={simStep >= 3 ? 'url(#glow-arrow-red)' : undefined}
+                      opacity={simStep >= 3 ? 1 : 0.45}
                     />
 
-                    {/* Hop 4: arn:aws:iam::aws.. -> corp-customer-pi.. */}
+                    {/* Arrow 4: arn:aws:iam::aws.. -> corp-customer-pi.. (Active at Step 4+) */}
                     <path
-                      id="sim-path-4"
-                      d="M 760 198 L 795 198"
+                      d="M 734 147 L 782 147"
                       fill="none"
-                      stroke="#ff4d4d"
-                      strokeWidth={simStep >= 4 ? "3" : "2.2"}
-                      strokeDasharray="6 4"
-                      markerEnd="url(#arrow-red)"
-                      className={simStep >= 4 ? "animate-pulse" : ""}
+                      stroke={simStep >= 4 ? '#ff1744' : '#7f1d1d'}
+                      strokeWidth={simStep >= 4 ? '3.5' : '1.5'}
+                      strokeDasharray={simStep >= 4 ? '8 4' : '5 3'}
+                      markerEnd={simStep >= 4 ? 'url(#arrow-bright-red)' : 'url(#arrow-dim-red)'}
+                      className={simStep >= 4 ? 'attack-arrow-active' : ''}
+                      filter={simStep >= 4 ? 'url(#glow-arrow-red)' : undefined}
+                      opacity={simStep >= 4 ? 1 : 0.45}
                     />
 
                     {/* ========================================================
-                        COLUMN 1: IDENTITIES
+                        COLUMN 1: IDENTITIES (Steady, non-turning cards)
                        ======================================================== */}
                     {/* 1.1: Alice */}
                     <g
-                      transform="translate(40, 75)"
+                      transform="translate(22, 42)"
                       className="cursor-pointer group"
                       onMouseEnter={() => setActiveBubble({
                         id: 'alice@corp.internal',
@@ -1176,14 +1194,14 @@ export default function App() {
                       })}
                       onMouseLeave={() => setActiveBubble(null)}
                     >
-                      <rect width="145" height="40" rx="6" fill="#09101d" stroke="#1b283d" strokeWidth="1" className="group-hover:stroke-cyan-500/50 transition-all" />
-                      <text x="12" y="17" fill="#cbd5e1" fontSize="11" fontWeight="bold" fontFamily="monospace">alice@corp.inter..</text>
-                      <text x="12" y="30" fill="#64748b" fontSize="8.5" fontWeight="600" fontFamily="monospace">IDENTITY • NORMAL</text>
+                      <rect width="138" height="36" rx="6" fill="#09101d" stroke="#1b283d" strokeWidth="1" className="group-hover:stroke-cyan-500/50 transition-all" />
+                      <text x="10" y="16" fill="#cbd5e1" fontSize="10.5" fontWeight="bold" fontFamily="monospace">alice@corp.inter..</text>
+                      <text x="10" y="28" fill="#64748b" fontSize="8" fontWeight="600" fontFamily="monospace">IDENTITY • NORMAL</text>
                     </g>
 
-                    {/* 1.2: Bob (Compromised Attacker) */}
+                    {/* 1.2: Bob (Compromised Attacker - Steady card with glowing border) */}
                     <g
-                      transform="translate(40, 140)"
+                      transform="translate(22, 96)"
                       className="cursor-pointer group"
                       onMouseEnter={() => setActiveBubble({
                         id: hopIdentity,
@@ -1201,30 +1219,27 @@ export default function App() {
                       })}
                       onMouseLeave={() => setActiveBubble(null)}
                     >
-                      {simStep >= 1 && (
-                        <rect x="-3" y="-3" width="151" height="48" rx="9" fill="none" stroke="#ff4d4d" strokeWidth="2" strokeDasharray="4 2" className="animate-spin" opacity="0.7" />
-                      )}
                       <rect
-                        width="145"
-                        height="42"
+                        width="138"
+                        height="38"
                         rx="6"
                         fill="#0f172a"
-                        stroke={simStep >= 1 ? '#ff4d4d' : '#6366f1'}
-                        strokeWidth="2.4"
-                        filter={simStep >= 1 ? 'url(#glow-red)' : 'url(#glow-indigo)'}
-                        className="group-hover:scale-105 transition-all"
+                        stroke={simStep >= 1 ? '#ff2255' : '#6366f1'}
+                        strokeWidth={simStep >= 1 ? '2.4' : '2'}
+                        filter={simStep >= 1 ? 'url(#glow-arrow-red)' : 'url(#glow-indigo)'}
+                        className="transition-all"
                       />
-                      <text x="12" y="18" fill="#ffffff" fontSize="11" fontWeight="bold" fontFamily="monospace">
+                      <text x="10" y="16" fill="#ffffff" fontSize="10.5" fontWeight="bold" fontFamily="monospace">
                         {formatIdentity(hopIdentity).slice(0, 15)}
                       </text>
-                      <text x="12" y="32" fill={simStep >= 1 ? '#fca5a5' : '#a5b4fc'} fontSize="8.5" fontWeight="600" fontFamily="monospace">
+                      <text x="10" y="29" fill={simStep >= 1 ? '#fca5a5' : '#a5b4fc'} fontSize="8" fontWeight="600" fontFamily="monospace">
                         IDENTITY • {simStep >= 1 ? 'COMPROMISED' : 'NORMAL'}
                       </text>
                     </g>
 
                     {/* 1.3: Charlie */}
                     <g
-                      transform="translate(40, 205)"
+                      transform="translate(22, 150)"
                       className="cursor-pointer group"
                       onMouseEnter={() => setActiveBubble({
                         id: 'charlie.analyst@corp.internal',
@@ -1237,14 +1252,14 @@ export default function App() {
                       })}
                       onMouseLeave={() => setActiveBubble(null)}
                     >
-                      <rect width="145" height="40" rx="6" fill="#09101d" stroke="#1b283d" strokeWidth="1" className="group-hover:stroke-cyan-500/50 transition-all" />
-                      <text x="12" y="17" fill="#cbd5e1" fontSize="11" fontWeight="bold" fontFamily="monospace">charlie.analyst@..</text>
-                      <text x="12" y="30" fill="#64748b" fontSize="8.5" fontWeight="600" fontFamily="monospace">IDENTITY • NORMAL</text>
+                      <rect width="138" height="36" rx="6" fill="#09101d" stroke="#1b283d" strokeWidth="1" className="group-hover:stroke-cyan-500/50 transition-all" />
+                      <text x="10" y="16" fill="#cbd5e1" fontSize="10.5" fontWeight="bold" fontFamily="monospace">charlie.analyst@..</text>
+                      <text x="10" y="28" fill="#64748b" fontSize="8" fontWeight="600" fontFamily="monospace">IDENTITY • NORMAL</text>
                     </g>
 
                     {/* 1.4: Diana Admin */}
                     <g
-                      transform="translate(40, 270)"
+                      transform="translate(22, 204)"
                       className="cursor-pointer group"
                       onMouseEnter={() => setActiveBubble({
                         id: 'diana.admin@corp.internal',
@@ -1257,17 +1272,17 @@ export default function App() {
                       })}
                       onMouseLeave={() => setActiveBubble(null)}
                     >
-                      <rect width="145" height="40" rx="6" fill="#18090d" stroke="#881337" strokeWidth="1.5" className="group-hover:stroke-rose-500 transition-all" />
-                      <text x="12" y="17" fill="#fecdd3" fontSize="11" fontWeight="bold" fontFamily="monospace">diana.admin@corp..</text>
-                      <text x="12" y="30" fill="#f43f5e" fontSize="8.5" fontWeight="bold" fontFamily="monospace">IDENTITY • HIGH</text>
+                      <rect width="138" height="36" rx="6" fill="#18090d" stroke="#881337" strokeWidth="1.5" className="group-hover:stroke-rose-500 transition-all" />
+                      <text x="10" y="16" fill="#fecdd3" fontSize="10.5" fontWeight="bold" fontFamily="monospace">diana.admin@corp..</text>
+                      <text x="10" y="28" fill="#f43f5e" fontSize="8" fontWeight="bold" fontFamily="monospace">IDENTITY • HIGH</text>
                     </g>
 
                     {/* ========================================================
-                        COLUMN 2: SESSIONS
+                        COLUMN 2: SESSIONS (Steady, non-turning cards)
                        ======================================================== */}
                     {/* 2.1: Attacker Session */}
                     <g
-                      transform="translate(235, 35)"
+                      transform="translate(212, 32)"
                       className="cursor-pointer group"
                       onMouseEnter={() => setActiveBubble({
                         id: 'Session: bob-ses..',
@@ -1281,61 +1296,61 @@ export default function App() {
                       onMouseLeave={() => setActiveBubble(null)}
                     >
                       <rect
-                        width="145"
-                        height="40"
+                        width="138"
+                        height="34"
                         rx="6"
                         fill="#0c1524"
-                        stroke={simStep >= 2 ? '#ff4d4d' : '#1e293b'}
+                        stroke={simStep >= 2 ? '#ff2255' : '#1e293b'}
                         strokeWidth={simStep >= 2 ? '2' : '1'}
-                        filter={simStep >= 2 ? 'url(#glow-red)' : undefined}
-                        className="group-hover:stroke-rose-400 transition-all"
+                        filter={simStep >= 2 ? 'url(#glow-arrow-red)' : undefined}
+                        className="transition-all"
                       />
-                      <text x="12" y="17" fill="#ffffff" fontSize="11" fontWeight="bold" fontFamily="monospace">Session: bob-ses..</text>
-                      <text x="12" y="30" fill={simStep >= 2 ? '#fca5a5' : '#64748b'} fontSize="8.5" fontWeight="600" fontFamily="monospace">
+                      <text x="10" y="15" fill="#ffffff" fontSize="10.5" fontWeight="bold" fontFamily="monospace">Session: bob-ses..</text>
+                      <text x="10" y="26" fill={simStep >= 2 ? '#fca5a5' : '#64748b'} fontSize="8" fontWeight="600" fontFamily="monospace">
                         SESSION • {simStep >= 2 ? 'HIJACKED' : 'NORMAL'}
                       </text>
                     </g>
 
                     {/* 2.2: sess-ch */}
-                    <g transform="translate(235, 95)" className="cursor-pointer group">
-                      <rect width="145" height="40" rx="6" fill="#080e18" stroke="#162032" strokeWidth="1" />
-                      <text x="12" y="17" fill="#94a3b8" fontSize="11" fontWeight="bold" fontFamily="monospace">Session: sess-ch..</text>
-                      <text x="12" y="30" fill="#475569" fontSize="8.5" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
+                    <g transform="translate(212, 74)" className="cursor-pointer group">
+                      <rect width="138" height="34" rx="6" fill="#080e18" stroke="#162032" strokeWidth="1" />
+                      <text x="10" y="15" fill="#94a3b8" fontSize="10.5" fontWeight="bold" fontFamily="monospace">Session: sess-ch..</text>
+                      <text x="10" y="26" fill="#475569" fontSize="8" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
                     </g>
 
                     {/* 2.3: sess-di */}
-                    <g transform="translate(235, 155)" className="cursor-pointer group">
-                      <rect width="145" height="40" rx="6" fill="#080e18" stroke={simStep >= 2 ? '#f43f5e' : '#162032'} strokeWidth="1" />
-                      <text x="12" y="17" fill="#94a3b8" fontSize="11" fontWeight="bold" fontFamily="monospace">Session: sess-di..</text>
-                      <text x="12" y="30" fill="#475569" fontSize="8.5" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
+                    <g transform="translate(212, 116)" className="cursor-pointer group">
+                      <rect width="138" height="34" rx="6" fill="#080e18" stroke={simStep >= 2 ? '#f43f5e' : '#162032'} strokeWidth="1" />
+                      <text x="10" y="15" fill="#94a3b8" fontSize="10.5" fontWeight="bold" fontFamily="monospace">Session: sess-di..</text>
+                      <text x="10" y="26" fill="#475569" fontSize="8" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
                     </g>
 
                     {/* 2.4: sess-ok */}
-                    <g transform="translate(235, 215)" className="cursor-pointer group">
-                      <rect width="145" height="40" rx="6" fill="#080e18" stroke="#162032" strokeWidth="1" />
-                      <text x="12" y="17" fill="#94a3b8" fontSize="11" fontWeight="bold" fontFamily="monospace">Session: sess-ok..</text>
-                      <text x="12" y="30" fill="#475569" fontSize="8.5" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
+                    <g transform="translate(212, 158)" className="cursor-pointer group">
+                      <rect width="138" height="34" rx="6" fill="#080e18" stroke="#162032" strokeWidth="1" />
+                      <text x="10" y="15" fill="#94a3b8" fontSize="10.5" fontWeight="bold" fontFamily="monospace">Session: sess-ok..</text>
+                      <text x="10" y="26" fill="#475569" fontSize="8" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
                     </g>
 
                     {/* 2.5: sess-ok */}
-                    <g transform="translate(235, 275)" className="cursor-pointer group">
-                      <rect width="145" height="40" rx="6" fill="#080e18" stroke="#162032" strokeWidth="1" />
-                      <text x="12" y="17" fill="#94a3b8" fontSize="11" fontWeight="bold" fontFamily="monospace">Session: sess-ok..</text>
-                      <text x="12" y="30" fill="#475569" fontSize="8.5" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
+                    <g transform="translate(212, 200)" className="cursor-pointer group">
+                      <rect width="138" height="34" rx="6" fill="#080e18" stroke="#162032" strokeWidth="1" />
+                      <text x="10" y="15" fill="#94a3b8" fontSize="10.5" fontWeight="bold" fontFamily="monospace">Session: sess-ok..</text>
+                      <text x="10" y="26" fill="#475569" fontSize="8" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
                     </g>
 
                     {/* 2.6: sess-ok */}
-                    <g transform="translate(235, 335)" className="cursor-pointer group">
-                      <rect width="145" height="40" rx="6" fill="#080e18" stroke="#162032" strokeWidth="1" />
-                      <text x="12" y="17" fill="#94a3b8" fontSize="11" fontWeight="bold" fontFamily="monospace">Session: sess-ok..</text>
-                      <text x="12" y="30" fill="#475569" fontSize="8.5" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
+                    <g transform="translate(212, 242)" className="cursor-pointer group">
+                      <rect width="138" height="34" rx="6" fill="#080e18" stroke="#162032" strokeWidth="1" />
+                      <text x="10" y="15" fill="#94a3b8" fontSize="10.5" fontWeight="bold" fontFamily="monospace">Session: sess-ok..</text>
+                      <text x="10" y="26" fill="#475569" fontSize="8" fontWeight="600" fontFamily="monospace">SESSION • NORMAL</text>
                     </g>
 
                     {/* ========================================================
-                        COLUMN 3: ROLES & STS
+                        COLUMN 3: ROLES & STS (Steady card)
                        ======================================================== */}
                     <g
-                      transform="translate(430, 175)"
+                      transform="translate(402, 126)"
                       className="cursor-pointer group"
                       onMouseEnter={() => setActiveBubble({
                         id: hopRole,
@@ -1353,31 +1368,28 @@ export default function App() {
                       })}
                       onMouseLeave={() => setActiveBubble(null)}
                     >
-                      {simStep >= 3 && (
-                        <rect x="-3" y="-3" width="151" height="52" rx="9" fill="none" stroke="#f59e0b" strokeWidth="2" strokeDasharray="4 2" className="animate-spin" opacity="0.6" />
-                      )}
                       <rect
-                        width="145"
-                        height="46"
+                        width="142"
+                        height="42"
                         rx="7"
                         fill="#451a03"
-                        stroke="#f59e0b"
-                        strokeWidth="2.2"
-                        className="group-hover:scale-105 transition-all drop-shadow-[0_0_12px_rgba(245,158,11,0.3)]"
+                        stroke={simStep >= 3 ? '#fbbf24' : '#f59e0b'}
+                        strokeWidth={simStep >= 3 ? '2.4' : '2'}
+                        className="transition-all"
                       />
-                      <text x="12" y="20" fill="#ffffff" fontSize="11.5" fontWeight="bold" fontFamily="monospace">
+                      <text x="10" y="18" fill="#ffffff" fontSize="11" fontWeight="bold" fontFamily="monospace">
                         {hopRole.includes('sts') ? hopRole : (hopRole.slice(0, 16))}
                       </text>
-                      <text x="12" y="34" fill="#fcd34d" fontSize="8.5" fontWeight="bold" fontFamily="monospace">
+                      <text x="10" y="32" fill="#fcd34d" fontSize="8" fontWeight="bold" fontFamily="monospace">
                         ROLE • MEDIUM
                       </text>
                     </g>
 
                     {/* ========================================================
-                        COLUMN 4: POLICIES
+                        COLUMN 4: POLICIES (Steady card)
                        ======================================================== */}
                     <g
-                      transform="translate(615, 175)"
+                      transform="translate(592, 126)"
                       className="cursor-pointer group"
                       onMouseEnter={() => setActiveBubble({
                         id: hopPolicy,
@@ -1395,39 +1407,36 @@ export default function App() {
                       })}
                       onMouseLeave={() => setActiveBubble(null)}
                     >
-                      {simStep >= 4 && (
-                        <rect x="-3" y="-3" width="151" height="52" rx="9" fill="none" stroke="#38bdf8" strokeWidth="2" strokeDasharray="4 2" className="animate-spin" opacity="0.6" />
-                      )}
                       <rect
-                        width="145"
-                        height="46"
+                        width="142"
+                        height="42"
                         rx="7"
                         fill="#0b1322"
-                        stroke="#38bdf8"
-                        strokeWidth={simStep >= 4 ? "2.2" : "1.8"}
-                        className="group-hover:scale-105 transition-all drop-shadow-[0_0_10px_rgba(56,189,248,0.25)]"
+                        stroke={simStep >= 4 ? '#38bdf8' : '#1e3a5f'}
+                        strokeWidth={simStep >= 4 ? '2.2' : '1.5'}
+                        className="transition-all"
                       />
-                      <text x="12" y="20" fill="#ffffff" fontSize="11" fontWeight="bold" fontFamily="monospace">
+                      <text x="10" y="18" fill="#ffffff" fontSize="10.5" fontWeight="bold" fontFamily="monospace">
                         arn:aws:iam::aws..
                       </text>
-                      <text x="12" y="34" fill="#7dd3fc" fontSize="8.5" fontWeight="bold" fontFamily="monospace">
+                      <text x="10" y="32" fill="#7dd3fc" fontSize="8" fontWeight="bold" fontFamily="monospace">
                         POLICY • MEDIUM
                       </text>
                     </g>
 
                     {/* ========================================================
-                        COLUMN 5: TARGET RESOURCES
+                        COLUMN 5: TARGET RESOURCES (Steady cards)
                        ======================================================== */}
                     {/* 5.1: corp-analytics-r.. */}
-                    <g transform="translate(795, 110)" className="cursor-pointer group">
-                      <rect width="145" height="40" rx="6" fill="#061a14" stroke="#065f46" strokeWidth="1" />
-                      <text x="12" y="17" fill="#cbd5e1" fontSize="11" fontWeight="bold" fontFamily="monospace">corp-analytics-r..</text>
-                      <text x="12" y="30" fill="#34d399" fontSize="8.5" fontWeight="600" fontFamily="monospace">RESOURCE • NORMAL</text>
+                    <g transform="translate(782, 72)" className="cursor-pointer group">
+                      <rect width="142" height="34" rx="6" fill="#061a14" stroke="#065f46" strokeWidth="1" />
+                      <text x="10" y="15" fill="#cbd5e1" fontSize="10.5" fontWeight="bold" fontFamily="monospace">corp-analytics-r..</text>
+                      <text x="10" y="26" fill="#34d399" fontSize="8" fontWeight="600" fontFamily="monospace">RESOURCE • NORMAL</text>
                     </g>
 
                     {/* 5.2: corp-customer-pi.. (High-Risk Exfiltration Target) */}
                     <g
-                      transform="translate(795, 175)"
+                      transform="translate(782, 126)"
                       className="cursor-pointer group"
                       onMouseEnter={() => setActiveBubble({
                         id: hopResource,
@@ -1445,41 +1454,35 @@ export default function App() {
                       })}
                       onMouseLeave={() => setActiveBubble(null)}
                     >
-                      {simStep >= 5 && (
-                        <rect x="-4" y="-4" width="153" height="54" rx="10" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeDasharray="5 3" className="animate-spin" opacity="0.8" />
-                      )}
                       <rect
-                        width="145"
-                        height="46"
+                        width="142"
+                        height="42"
                         rx="7"
                         fill="#450a0a"
-                        stroke="#ef4444"
-                        strokeWidth="2.6"
-                        filter={simStep >= 5 ? 'url(#glow-red)' : undefined}
-                        className={`group-hover:scale-105 transition-all drop-shadow-[0_0_16px_rgba(239,68,68,0.5)] ${
-                          simStep === 5 ? 'animate-pulse' : ''
-                        }`}
+                        stroke={simStep >= 5 ? '#ff1744' : '#ef4444'}
+                        strokeWidth={simStep >= 5 ? '2.5' : '1.8'}
+                        className="transition-all"
                       />
-                      <text x="12" y="20" fill="#ffffff" fontSize="11" fontWeight="bold" fontFamily="monospace">
+                      <text x="10" y="18" fill="#ffffff" fontSize="10.5" fontWeight="bold" fontFamily="monospace">
                         {hopResource.includes('vault') ? 'corp-customer-pi..' : (hopResource.slice(0, 16))}
                       </text>
-                      <text x="12" y="34" fill="#fca5a5" fontSize="8.5" fontWeight="bold" fontFamily="monospace">
+                      <text x="10" y="32" fill="#fca5a5" fontSize="8" fontWeight="bold" fontFamily="monospace">
                         RESOURCE • HIGH
                       </text>
                     </g>
 
                     {/* 5.3: corp-dev-builds */}
-                    <g transform="translate(795, 250)" className="cursor-pointer group">
-                      <rect width="145" height="40" rx="6" fill="#061a14" stroke="#065f46" strokeWidth="1" />
-                      <text x="12" y="17" fill="#cbd5e1" fontSize="11" fontWeight="bold" fontFamily="monospace">corp-dev-builds</text>
-                      <text x="12" y="30" fill="#34d399" fontSize="8.5" fontWeight="600" fontFamily="monospace">RESOURCE • NORMAL</text>
+                    <g transform="translate(782, 190)" className="cursor-pointer group">
+                      <rect width="142" height="34" rx="6" fill="#061a14" stroke="#065f46" strokeWidth="1" />
+                      <text x="10" y="15" fill="#cbd5e1" fontSize="10.5" fontWeight="bold" fontFamily="monospace">corp-dev-builds</text>
+                      <text x="10" y="26" fill="#34d399" fontSize="8" fontWeight="600" fontFamily="monospace">RESOURCE • NORMAL</text>
                     </g>
 
                     {/* Zero Trust Containment Shield Overlay when Step 6 reached */}
                     {simStep >= 6 && (
-                      <g transform="translate(485, 95)" className="animate-bounce">
-                        <rect x="-10" y="-10" width="220" height="38" rx="8" fill="#03180f" stroke="#10b981" strokeWidth="2" filter="url(#glow-indigo)" />
-                        <text x="100" y="14" fill="#6ee7b7" fontSize="11" fontWeight="bold" fontFamily="monospace" textAnchor="middle">
+                      <g transform="translate(430, 65)">
+                        <rect x="0" y="0" width="220" height="32" rx="7" fill="#03180f" stroke="#10b981" strokeWidth="1.8" />
+                        <text x="110" y="20" fill="#6ee7b7" fontSize="10.5" fontWeight="bold" fontFamily="monospace" textAnchor="middle">
                           🛡️ REVOKE_SESSION ENFORCED
                         </text>
                       </g>
@@ -1488,47 +1491,41 @@ export default function App() {
 
                   {/* Interactive Node Telemetry Flyout Card (Displays on hover) */}
                   {activeBubble ? (
-                    <div className="absolute right-6 top-6 w-80 p-4 rounded-2xl border border-cyan-800/60 bg-[#070b12]/95 backdrop-blur-md shadow-2xl space-y-3 z-30 font-mono pointer-events-none animate-fadeIn">
-                      <div className="flex items-center justify-between border-b border-[#182030] pb-2">
+                    <div className="absolute right-4 top-4 w-72 p-3.5 rounded-xl border border-cyan-800/60 bg-[#070b12]/95 backdrop-blur-md shadow-2xl space-y-2.5 z-30 font-mono pointer-events-none animate-fadeIn">
+                      <div className="flex items-center justify-between border-b border-[#182030] pb-1.5">
                         <div className="flex items-center space-x-2">
-                          <span className="text-base">{activeBubble.icon}</span>
+                          <span className="text-sm">{activeBubble.icon}</span>
                           <span className="text-xs font-bold text-white uppercase tracking-wider">{activeBubble.title}</span>
                         </div>
-                        <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-cyan-950 text-cyan-300 border border-cyan-700/50 flex items-center space-x-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
-                          <span>HOVER TELEMETRY</span>
+                        <span className="px-1.5 py-0.5 rounded text-[8.5px] font-bold bg-cyan-950 text-cyan-300 border border-cyan-700/50">
+                          TELEMETRY
                         </span>
                       </div>
 
-                      <p className="text-[11px] text-zinc-300 font-sans leading-tight">
+                      <p className="text-[10.5px] text-zinc-300 font-sans leading-tight">
                         {activeBubble.roleDesc}
                       </p>
 
-                      <div className="space-y-1.5 bg-[#03060a] p-2.5 rounded-xl border border-[#141b29] text-[11px]">
+                      <div className="space-y-1 bg-[#03060a] p-2 rounded-lg border border-[#141b29] text-[10.5px]">
                         {Object.entries(activeBubble.attributes).map(([k, v]) => (
                           <div key={k} className="flex items-start justify-between">
                             <span className="text-zinc-400">{k}:</span>
-                            <span className="text-cyan-300 text-right font-semibold truncate max-w-[155px]">{v}</span>
+                            <span className="text-cyan-300 text-right font-semibold truncate max-w-[140px]">{v}</span>
                           </div>
                         ))}
                       </div>
-
-                      <div className="text-[10px] text-cyan-400/80 text-right italic font-mono flex items-center justify-end space-x-1">
-                        <span>●</span>
-                        <span>Hovering node • Move cursor off to dismiss</span>
-                      </div>
                     </div>
                   ) : (
-                    <div className="absolute right-6 bottom-4 px-3.5 py-1.5 rounded-xl border border-[#181824] bg-[#07070b]/80 backdrop-blur text-[10px] font-mono text-zinc-400 pointer-events-none flex items-center space-x-2 shadow-sm">
+                    <div className="absolute right-4 bottom-3 px-3 py-1 rounded-lg border border-[#181824] bg-[#07070b]/80 backdrop-blur text-[9.5px] font-mono text-zinc-400 pointer-events-none flex items-center space-x-1.5 shadow-sm">
                       <span className="w-1.5 h-1.5 rounded-full bg-cyan-500/60 animate-pulse"></span>
                       <span>Hover over any card to inspect credentials and role details</span>
                     </div>
                   )}
                 </div>
 
-                <div className="flex items-center justify-between text-xs font-mono text-zinc-400 pt-1">
-                  <span>💡 Tip: Trigger "⚡ Generate Attack" in the left panel to watch the live simulation unfold automatically.</span>
-                  <span className="text-cyan-400/80">5 Stages • 15 Nodes Active</span>
+                <div className="flex items-center justify-between text-xs font-mono text-zinc-400 pt-0.5">
+                  <span>💡 Tip: Click "Play Simulation" to highlight the attack arrows from Left to Right.</span>
+                  <span className="text-cyan-400/80">5 Lanes • 15 Nodes Active</span>
                 </div>
               </div>
             </div>
