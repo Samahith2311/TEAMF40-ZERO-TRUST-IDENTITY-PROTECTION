@@ -97,3 +97,4 @@ python -m src.cli score --input data/synthetic
 # 4. Run mTLS fast-path benchmark
 python scripts/bench_mtls.py --quick
 ```
+

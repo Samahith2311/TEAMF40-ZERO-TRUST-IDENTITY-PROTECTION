@@ -33,3 +33,4 @@ Known Deficiencies to Fix in Tier 1:
 3. Pipeline in src/pipeline.py has hardcoded slices.
 4. diana.admin@corp.internal marked is_protected: false in fixtures/identities.json.
 5. Evidence verifier needs strict raw_sha256 matching and traversal prevention.
+

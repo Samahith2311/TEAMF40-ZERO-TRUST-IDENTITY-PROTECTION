@@ -94,3 +94,4 @@ To prevent label leakage and ensure evaluation integrity, the engine strictly se
 - `POST /api/mtls/decide`: Evaluate mTLS peer certificate binding and risk-adaptive fast-path decision.
 - `GET /api/mtls/stats`: Cache hit/miss and decision latency counters.
 - `POST /api/synthetic/generate`: Trigger raw synthetic attack scenario through normal pipeline.
+

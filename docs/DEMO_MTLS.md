@@ -123,3 +123,4 @@ python scripts/bench_mtls.py --quick
 | **mTLS Full Path (Uncached Risk)** | `0.0216 ms` | ~46,000 req/s | Cache Miss |
 | **mTLS Fast Path (Warm Cache Hit)** | **`0.0102 ms`** | **~98,000 req/s** | **Cache Hit (2.1x speedup)** |
 | **mTLS Mismatch Replay (DET-06)** | `0.0195 ms` | ~51,000 req/s | Cache Purge & Alert |
+

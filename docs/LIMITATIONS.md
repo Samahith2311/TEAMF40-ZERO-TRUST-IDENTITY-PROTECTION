@@ -12,3 +12,4 @@
 ## 3. Geo & Transport Inferences
 - **Inferred Geo**: When CloudTrail events lack geo coordinates, location context from preceding Okta sessions is carried forward marked as `INFERRED` / `CARRIED_FORWARD`. Inferred coordinates carry lower confidence than direct observations.
 - **Proxy Trust**: In mTLS deployments, client certificate fingerprints forwarded via reverse proxies (`X-Client-Cert-Fingerprint`) must originate strictly from configured trusted proxy interfaces. Direct TLS peer extraction via transport socket is preferred.
+

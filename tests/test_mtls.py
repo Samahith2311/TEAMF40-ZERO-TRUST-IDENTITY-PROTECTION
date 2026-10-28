@@ -135,3 +135,4 @@ def test_mismatch_forces_full_rescore_and_invalidates_cache():
     finally:
         src.mtls._binding_store = orig_store
         src.mtls._decision_cache = orig_cache
+
