@@ -241,3 +241,74 @@ def api_approve_rotation(payload: Dict[str, Any] = Body(...)):
     store = get_binding_store()
     ok = store.approve_rotation(identity, session_id, new_fp, approver)
     return {"status": "ROTATION_APPROVED", "identity": identity, "session_id": session_id, "approved_fingerprint": new_fp}
+
+@app.get("/api/mtls/status")
+def api_mtls_status():
+    from src.mtls import load_x509_certificates, get_binding_store, get_decision_cache
+    certs = load_x509_certificates()
+    bindings = get_binding_store().list_bindings()
+    stats = get_decision_cache().stats()
+    return {
+        "status": "ONLINE",
+        "certificates": list(certs.values()),
+        "active_bindings": bindings,
+        "cache_stats": stats,
+        "risk_bands": {
+            "GREEN_FAST_PATH": {
+                "range": "0-29",
+                "action": "FAST_PATH_ALLOW",
+                "ttl_seconds": 120,
+                "description": "Sub-millisecond fast-path cache hit + Contextual Chained Macaroon verification"
+            },
+            "YELLOW_ASYNC_REVALIDATE": {
+                "range": "30-59",
+                "action": "MONITOR_AND_RESCORE",
+                "ttl_seconds": 15,
+                "description": "Low-friction allow with asynchronous background re-evaluation and shortened lease"
+            },
+            "RED_STEP_UP_OR_REVOKE": {
+                "range": "60-100",
+                "action": "FULL_VERIFY_STEP_UP / REVOKE",
+                "ttl_seconds": 0,
+                "description": "Immediate decision cache eviction, token revocation, DET-06 audit alert"
+            }
+        },
+        "standards": {
+            "rfc": "RFC 8705 OAuth 2.0 Mutual-TLS Client Authentication and Certificate-Bound Access Tokens",
+            "macaroon_hash": "HMAC-SHA256 Contextual Chaining",
+            "fast_path_latency_target_ms": "< 0.05 ms",
+            "naive_hop_latency_ms": "~22-35 ms per hop"
+        }
+    }
+
+@app.post("/api/mtls/simulate-cascade")
+def api_simulate_cascade(payload: Dict[str, Any] = Body(...)):
+    from src.mtls import simulate_microservice_cascade
+    identity = sanitize_query_param(payload.get("identity", "bob.contractor@corp.internal"))
+    cert_alias = sanitize_query_param(payload.get("cert_alias", "bob"))
+    hops = int(payload.get("hops", 25))
+    hops = max(5, min(hops, 30))
+
+    result = simulate_microservice_cascade(
+        identity=identity,
+        cert_alias=cert_alias,
+        hops=hops
+    )
+    return result
+
+@app.post("/api/mtls/simulate-hijack")
+def api_simulate_hijack(payload: Dict[str, Any] = Body(...)):
+    from src.mtls import simulate_microservice_cascade
+    identity = sanitize_query_param(payload.get("identity", "bob.contractor@corp.internal"))
+    cert_alias = sanitize_query_param(payload.get("cert_alias", "bob"))
+    hijack_hop = int(payload.get("hijack_hop", 12))
+    hops = int(payload.get("hops", 25))
+    hops = max(5, min(hops, 30))
+
+    result = simulate_microservice_cascade(
+        identity=identity,
+        cert_alias=cert_alias,
+        hops=hops,
+        simulate_hijack_at_hop=hijack_hop
+    )
+    return result
