@@ -1,0 +1,35 @@
+BASELINE BEFORE TIER 1 IMPROVEMENTS
+Captured: 2026-10-28
+Environment: Python 3.14.5 Windows (win32)
+Test Suite: python -m pytest tests/ -q -> 36 passed in 3.16s
+
+Command: python -m src.cli eval
+Output:
+================================================================================
+EVALUATION HARNESS REPORT: TRACK 2 ZERO TRUST ENGINE
+Split: WHOLE_IDENTITY_HOLDOUT (seed=42) | n_events=7 | Label: VERIFIED
+Replay Latency: 0.0109 ms/evt (Total: 0.0766 ms) | Load: not published (synthetic replay benchmark)
+Evidence Citation Integrity: 100.0% valid in raw
+Chain Reconstruction Recall: 100.0%
+Explanation Quality Score: 100.0% (Rubric Checklist: All PASS)
+--------------------------------------------------------------------------------
+Metric Level         | Ours (P/R/F1/FPR)            | Baseline (P/R/F1/FPR)        | Delta F1  
+--------------------------------------------------------------------------------
+Event Level (Overall) | 1.00/1.00/1.00/0.00 | 1.00/0.20/0.33/0.00 | +0.6667
+Identity Level       | 1.00/1.00/1.00/0.00 | 1.00/1.00/1.00/0.00 | +0.0000
+Session Level        | 1.00/1.00/1.00/0.00 | 0.00/0.00/0.00/0.00 | +1.0000
+--------------------------------------------------------------------------------
+Per-Detector Event-Level F1 & FPR:
+  - dormant             : P=1.00, R=0.60, F1=0.75, FPR=0.00 (TP=3, FP=0, FN=2, TN=2)
+  - token_abuse         : P=0.00, R=0.00, F1=0.00, FPR=0.00 (TP=0, FP=0, FN=5, TN=2)
+  - priv_escalation     : P=1.00, R=0.20, F1=0.33, FPR=0.00 (TP=1, FP=0, FN=4, TN=2)
+  - unusual_api         : P=1.00, R=0.60, F1=0.75, FPR=0.00 (TP=3, FP=0, FN=2, TN=2)
+  - impossible_travel   : P=0.00, R=0.00, F1=0.00, FPR=0.00 (TP=0, FP=0, FN=5, TN=2)
+================================================================================
+
+Known Deficiencies to Fix in Tier 1:
+1. Detectors token_abuse (DET-02) and impossible_travel (DET-05) have 0.00 recall on fixture evaluations because per-detector evaluation scored every detector against ALL attack events rather than its own attack type, and detectors lacked support for intermediate CloudTrail non-AssumeRole events / geo carry-forward.
+2. Ingestion exposes inline labels (label field in fixtures) to detectors.
+3. Pipeline in src/pipeline.py has hardcoded slices.
+4. diana.admin@corp.internal marked is_protected: false in fixtures/identities.json.
+5. Evidence verifier needs strict raw_sha256 matching and traversal prevention.

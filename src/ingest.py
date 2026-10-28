@@ -47,14 +47,21 @@ def normalize_timestamp(ts_str: str) -> Tuple[str, Optional[str], bool]:
         now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         return now_utc, None, False
     try:
-        dt = datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
+        clean_ts = str(ts_str).strip()
+        if clean_ts.endswith("Z"):
+            clean_ts = clean_ts[:-1] + "+00:00"
+        dt = datetime.fromisoformat(clean_ts)
         dt_utc = dt.astimezone(timezone.utc)
-        return dt_utc.strftime("%Y-%m-%dT%H:%M:%SZ"), ts_str, True
+        return dt_utc.strftime("%Y-%m-%dT%H:%M:%SZ"), str(ts_str), True
     except Exception:
         now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-        return now_utc, ts_str, False
+        return now_utc, str(ts_str), False
 
-def parse_okta_record(raw: Dict[str, Any], source_file: str, line_no: int, raw_hash: str) -> Tuple[NormalizedEvent, ValidationResult]:
+def parse_okta_record(raw_input: Dict[str, Any], source_file: str, line_no: int, raw_hash: str) -> Tuple[NormalizedEvent, ValidationResult, Optional[str]]:
+    raw = dict(raw_input)
+    # Strip evaluation labels so detectors and scoring never see ground truth
+    extracted_label = raw.pop("label", None) or raw.pop("attack_type", None) or raw.pop("ground_truth", None)
+
     event_id = str(raw.get("event_id") or raw.get("uuid") or f"okta-{line_no}-{raw_hash[:8]}")
     ts_raw = raw.get("published") or raw.get("timestamp") or ""
     ts_utc, ts_orig, ts_valid = normalize_timestamp(ts_raw)
@@ -62,7 +69,22 @@ def parse_okta_record(raw: Dict[str, Any], source_file: str, line_no: int, raw_h
     actor = raw.get("actor", {})
     identity_key = actor.get("alternateId") or actor.get("id") or raw.get("userId") or "unknown"
     client = raw.get("client", {})
-    geo = client.get("geographicalContext") or client.get("geo") or {}
+    raw_geo = client.get("geographicalContext") or client.get("geo") or {}
+    
+    # Safe geo parsing: 0.0 latitude / longitude is valid, not falsey!
+    geo = {}
+    lat = raw_geo.get("latitude") if raw_geo.get("latitude") is not None else raw_geo.get("lat")
+    lon = raw_geo.get("longitude") if raw_geo.get("longitude") is not None else raw_geo.get("lon")
+    if lat is not None and lon is not None:
+        try:
+            geo = {
+                "lat": float(lat),
+                "lon": float(lon),
+                "city": raw_geo.get("city", "Unknown"),
+                "country": raw_geo.get("country", "Unknown")
+            }
+        except (ValueError, TypeError):
+            geo = {}
     
     outcome_raw = str(raw.get("outcome", {}).get("result") or raw.get("result", "UNKNOWN")).upper()
     outcome = "SUCCESS" if outcome_raw in ["SUCCESS", "ALLOW"] else ("FAILURE" if outcome_raw in ["FAILURE", "DENY", "DENIED"] else "UNKNOWN")
@@ -73,6 +95,14 @@ def parse_okta_record(raw: Dict[str, Any], source_file: str, line_no: int, raw_h
     action = raw.get("eventType") or raw.get("action") or "unknown_action"
     debug = raw.get("debugContext", {})
     session_id = debug.get("session_id") or client.get("session_id")
+
+    # Extract all identity candidates for cross-source correlation
+    identity_candidates = []
+    for candidate in [actor.get("alternateId"), actor.get("id"), actor.get("displayName"), raw.get("userId")]:
+        if candidate and str(candidate) not in identity_candidates:
+            identity_candidates.append(str(candidate))
+
+    cert_fingerprint = raw.get("cert_fingerprint") or client.get("cert_fingerprint") or client.get("tls_client_cert_sha256")
 
     reasons = []
     structural_ok = True
@@ -93,8 +123,10 @@ def parse_okta_record(raw: Dict[str, Any], source_file: str, line_no: int, raw_h
         ts_utc=ts_utc,
         ts_original_tz=ts_orig,
         identity_key=identity_key,
+        identity_candidates=identity_candidates,
         principal_raw=actor.get("displayName") or identity_key,
         session_id=session_id,
+        request_id=raw.get("requestId"),
         ip=client.get("ipAddress") or client.get("ip") or "0.0.0.0",
         geo=geo,
         user_agent=client.get("userAgent") or client.get("user_agent") or "unknown",
@@ -102,6 +134,7 @@ def parse_okta_record(raw: Dict[str, Any], source_file: str, line_no: int, raw_h
         resource=resource,
         outcome=outcome,
         privilege_context={"role": "user", "clearance": 1, "admin": False},
+        cert_fingerprint=cert_fingerprint,
         raw_hash=raw_hash,
         validation=ValidationDetails(status=status, reasons=reasons)
     )
@@ -114,9 +147,13 @@ def parse_okta_record(raw: Dict[str, Any], source_file: str, line_no: int, raw_h
         identity_ref_ok=(identity_key != "unknown"),
         reasons=reasons
     )
-    return norm, val_res
+    return norm, val_res, extracted_label
 
-def parse_cloudtrail_record(raw: Dict[str, Any], source_file: str, line_no: int, raw_hash: str) -> Tuple[NormalizedEvent, ValidationResult]:
+def parse_cloudtrail_record(raw_input: Dict[str, Any], source_file: str, line_no: int, raw_hash: str) -> Tuple[NormalizedEvent, ValidationResult, Optional[str]]:
+    raw = dict(raw_input)
+    # Strip evaluation labels so detectors and scoring never see ground truth
+    extracted_label = raw.pop("label", None) or raw.pop("attack_type", None) or raw.pop("ground_truth", None)
+
     event_id = str(raw.get("event_id") or raw.get("eventID") or f"ct-{line_no}-{raw_hash[:8]}")
     ts_raw = raw.get("eventTime") or raw.get("timestamp") or ""
     ts_utc, ts_orig, ts_valid = normalize_timestamp(ts_raw)
@@ -140,6 +177,22 @@ def parse_cloudtrail_record(raw: Dict[str, Any], source_file: str, line_no: int,
     session_ctx = user_ident.get("sessionContext", {})
     session_issuer = session_ctx.get("sessionIssuer", {})
     role_arn = session_issuer.get("arn", "")
+    role_session_name = req_params.get("roleSessionName") or session_issuer.get("userName")
+
+    # Extract all identity candidates for cross-source correlation
+    identity_candidates = []
+    for candidate in [
+        user_ident.get("userName"),
+        user_ident.get("arn"),
+        user_ident.get("principalId"),
+        role_session_name,
+        role_arn,
+        raw.get("userId")
+    ]:
+        if candidate and str(candidate) not in identity_candidates:
+            identity_candidates.append(str(candidate))
+
+    cert_fingerprint = raw.get("cert_fingerprint") or raw.get("tls_client_cert_sha256")
 
     reasons = []
     structural_ok = True
@@ -163,8 +216,10 @@ def parse_cloudtrail_record(raw: Dict[str, Any], source_file: str, line_no: int,
         ts_utc=ts_utc,
         ts_original_tz=ts_orig,
         identity_key=identity_key,
+        identity_candidates=identity_candidates,
         principal_raw=user_ident.get("arn") or identity_key,
-        session_id=req_params.get("roleSessionName") or user_ident.get("sessionContext", {}).get("sessionIssuer", {}).get("userName"),
+        session_id=role_session_name or user_ident.get("sessionContext", {}).get("sessionIssuer", {}).get("userName"),
+        request_id=raw.get("requestID") or raw.get("eventID"),
         ip=raw.get("sourceIPAddress") or raw.get("ip") or "0.0.0.0",
         geo={},
         user_agent=raw.get("userAgent") or "aws-cli",
@@ -172,6 +227,7 @@ def parse_cloudtrail_record(raw: Dict[str, Any], source_file: str, line_no: int,
         resource=resource,
         outcome=outcome,
         privilege_context={"role": role_arn or "IAMUser", "clearance": clearance, "admin": is_admin},
+        cert_fingerprint=cert_fingerprint,
         raw_hash=raw_hash,
         validation=ValidationDetails(status=status, reasons=reasons)
     )
@@ -184,7 +240,7 @@ def parse_cloudtrail_record(raw: Dict[str, Any], source_file: str, line_no: int,
         identity_ref_ok=(identity_key != "unknown"),
         reasons=reasons
     )
-    return norm, val_res
+    return norm, val_res, extracted_label
 
 def ingest_file(file_path: str, db=None) -> Dict[str, Any]:
     if db is None:
@@ -197,6 +253,7 @@ def ingest_file(file_path: str, db=None) -> Dict[str, Any]:
 
     col_events: Collection = db[COLLECTIONS["normalized_events"]]
     col_val: Collection = db[COLLECTIONS["validation_results"]]
+    col_eval_labels: Collection = db[COLLECTIONS.get("evaluation_labels", "evaluation_labels")]
 
     total_read = 0
     new_inserted = 0
@@ -205,64 +262,106 @@ def ingest_file(file_path: str, db=None) -> Dict[str, Any]:
 
     bulk_ops = []
     val_records = []
+    label_ops = []
 
     last_ts = None
     order_failures = 0
 
+    # Schema drift support: handle JSON {"Records": [...]} wrapper or standard JSONL
     with open(path, "r", encoding="utf-8") as f:
-        for idx, line in enumerate(f, start=1):
-            if len(line) > MAX_LINE_LENGTH_BYTES:
-                raise ValueError(f"Line {idx} in {path.name} exceeds max length {MAX_LINE_LENGTH_BYTES} bytes.")
-
-            line_str = line.strip()
-            if not line_str:
-                continue
-            total_read += 1
-            raw_hash = compute_raw_hash(line_str)
+        first_char = f.read(1)
+        f.seek(0)
+        
+        # Check if entire file is a single JSON document (e.g. {"Records": [...]})
+        records_to_process = []
+        if first_char == '{':
             try:
-                raw_json = json.loads(line_str)
-            except Exception as e:
-                val_res = ValidationResult(
-                    record_ref=f"{path.name}:{idx}",
-                    structural_ok=False,
-                    timestamp_ok=False,
-                    order_ok=False,
-                    identity_ref_ok=False,
-                    reasons=[f"Malformed JSON: {str(e)}"]
-                )
-                col_val.insert_one(val_res.model_dump())
-                invalid_count += 1
-                continue
+                content = f.read()
+                f.seek(0)
+                parsed_root = json.loads(content)
+                if isinstance(parsed_root, dict) and "Records" in parsed_root and isinstance(parsed_root["Records"], list):
+                    for idx, rec in enumerate(parsed_root["Records"], start=1):
+                        records_to_process.append((idx, json.dumps(rec), rec))
+            except Exception:
+                pass
 
-            if is_okta:
-                norm_evt, val_res = parse_okta_record(raw_json, path.name, idx, raw_hash)
-            elif is_cloudtrail:
-                norm_evt, val_res = parse_cloudtrail_record(raw_json, path.name, idx, raw_hash)
-            else:
-                norm_evt, val_res = parse_okta_record(raw_json, path.name, idx, raw_hash)
+        if not records_to_process:
+            # Standard JSONL line-by-line processing
+            f.seek(0)
+            for idx, line in enumerate(f, start=1):
+                if len(line) > MAX_LINE_LENGTH_BYTES:
+                    raise ValueError(f"Line {idx} in {path.name} exceeds max length {MAX_LINE_LENGTH_BYTES} bytes.")
+                line_str = line.strip()
+                if not line_str:
+                    continue
+                try:
+                    rec_json = json.loads(line_str)
+                    records_to_process.append((idx, line_str, rec_json))
+                except Exception as e:
+                    val_res = ValidationResult(
+                        record_ref=f"{path.name}:{idx}",
+                        structural_ok=False,
+                        timestamp_ok=False,
+                        order_ok=False,
+                        identity_ref_ok=False,
+                        reasons=[f"Malformed JSON: {str(e)}"]
+                    )
+                    col_val.insert_one(val_res.model_dump())
+                    invalid_count += 1
+                    total_read += 1
+                    continue
 
-            # Check timestamp ordering
-            if last_ts and norm_evt.ts_utc < last_ts:
-                val_res.order_ok = False
-                val_res.reasons.append("Out of order timestamp relative to preceding log line")
-                order_failures += 1
-            last_ts = norm_evt.ts_utc
+    for idx, raw_line_str, raw_json in records_to_process:
+        total_read += 1
+        raw_hash = compute_raw_hash(raw_line_str)
 
-            val_records.append(val_res.model_dump())
-            if not val_res.structural_ok or not val_res.timestamp_ok:
-                invalid_count += 1
+        if is_okta:
+            norm_evt, val_res, extracted_label = parse_okta_record(raw_json, path.name, idx, raw_hash)
+        elif is_cloudtrail:
+            norm_evt, val_res, extracted_label = parse_cloudtrail_record(raw_json, path.name, idx, raw_hash)
+        else:
+            norm_evt, val_res, extracted_label = parse_okta_record(raw_json, path.name, idx, raw_hash)
 
-            doc = norm_evt.model_dump()
-            bulk_ops.append(
+        # Check timestamp ordering
+        if last_ts and norm_evt.ts_utc < last_ts:
+            val_res.order_ok = False
+            val_res.reasons.append("Out of order timestamp relative to preceding log line")
+            order_failures += 1
+        last_ts = norm_evt.ts_utc
+
+        val_records.append(val_res.model_dump())
+        if not val_res.structural_ok or not val_res.timestamp_ok:
+            invalid_count += 1
+
+        doc = norm_evt.model_dump()
+        bulk_ops.append(
+            UpdateOne(
+                {"source": doc["source"], "event_id": doc["event_id"]},
+                {"$setOnInsert": doc},
+                upsert=True
+            )
+        )
+
+        # Store evaluation label strictly in the isolated evaluation plane
+        if extracted_label:
+            label_ops.append(
                 UpdateOne(
-                    {"source": doc["source"], "event_id": doc["event_id"]},
-                    {"$setOnInsert": doc},
+                    {"event_id": norm_evt.event_id},
+                    {"$set": {
+                        "event_id": norm_evt.event_id,
+                        "label": extracted_label,
+                        "source_file": path.name,
+                        "record_ref": norm_evt.record_ref
+                    }},
                     upsert=True
                 )
             )
 
     if val_records:
         col_val.insert_many(val_records, ordered=False)
+
+    if label_ops:
+        col_eval_labels.bulk_write(label_ops, ordered=False)
 
     if bulk_ops:
         try:

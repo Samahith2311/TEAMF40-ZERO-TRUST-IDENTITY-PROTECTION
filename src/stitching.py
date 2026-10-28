@@ -3,45 +3,78 @@ from src.models import IdentityLink, IncidentChain, ChainStage
 
 def stitch_identity_events(events: List[Dict[str, Any]]) -> Tuple[List[IdentityLink], List[IncidentChain]]:
     """
-    Links Okta authentication events to AWS CloudTrail events by:
-    1. Direct email/identity match
-    2. IP address + temporal proximity
-    3. Session correlation
+    Correlates Okta authentication and AWS CloudTrail events across identities and sessions:
+    1. Direct identity candidate overlap (email, user ID, ARN)
+    2. Session correlation (Okta debugContext.session_id, CloudTrail roleSessionName)
+    3. IP address and temporal proximity
+    Reconstructs ordered multi-step attack chains with evidence references.
     """
-    links = []
-    chains = []
+    links: List[IdentityLink] = []
+    chains: List[IncidentChain] = []
 
-    # Group events by identity_key
-    by_identity = {}
+    # Group events by canonical identity candidates
+    identity_to_events: Dict[str, List[Dict[str, Any]]] = {}
+    session_to_events: Dict[str, List[Dict[str, Any]]] = {}
+
     for evt in events:
-        ident = evt.get("identity_key")
-        if ident not in by_identity:
-            by_identity[ident] = []
-        by_identity[ident].append(evt)
+        ident = evt.get("identity_key", "unknown")
+        identity_to_events.setdefault(ident, []).append(evt)
+        candidates = evt.get("identity_candidates") or [ident]
+        for c in candidates:
+            if c != ident:
+                identity_to_events.setdefault(c, []).append(evt)
 
-    for ident, evts in by_identity.items():
-        sorted_evts = sorted(evts, key=lambda x: x.get("ts_utc", ""))
-        stages = []
+        sess_id = evt.get("session_id")
+        if sess_id:
+            session_to_events.setdefault(sess_id, []).append(evt)
+
+    # Process each primary identity group
+    primary_identities = {e.get("identity_key") for e in events if e.get("identity_key") and e.get("identity_key") != "unknown"}
+
+    for ident in primary_identities:
+        evts = identity_to_events.get(ident, [])
+        # Deduplicate events in group by event_id
+        seen_eids = set()
+        unique_evts = []
+        for e in evts:
+            eid = e.get("event_id")
+            if eid and eid not in seen_eids:
+                seen_eids.add(eid)
+                unique_evts.append(e)
+
+        sorted_evts = sorted(unique_evts, key=lambda x: x.get("ts_utc", ""))
+        stages: List[ChainStage] = []
         incident_id = f"inc-{ident.replace('@', '_').replace('.', '_')}"
 
         okta_evts = [e for e in sorted_evts if e.get("source") == "okta"]
         ct_evts = [e for e in sorted_evts if e.get("source") == "cloudtrail"]
 
-        # Link Okta to CloudTrail
+        # Link Okta to CloudTrail with typed provenance
         for ok in okta_evts:
             for ct in ct_evts:
                 basis = []
                 conf = 0.5
                 prov = "ANALYTICAL_INFERENCE"
 
-                if ok.get("identity_key") == ct.get("identity_key"):
-                    basis.append("exact_identity_match")
+                # Check exact identity match or candidate overlap
+                ok_candidates = set(ok.get("identity_candidates") or [ok.get("identity_key")])
+                ct_candidates = set(ct.get("identity_candidates") or [ct.get("identity_key")])
+
+                if ok.get("identity_key") == ct.get("identity_key") or bool(ok_candidates.intersection(ct_candidates)):
+                    basis.append("identity_candidate_overlap")
                     conf += 0.3
                     prov = "VALIDATED_OBSERVATION"
 
+                # Check session ID correlation
+                if ok.get("session_id") and ct.get("session_id") and ok.get("session_id") == ct.get("session_id"):
+                    basis.append("session_id_match")
+                    conf += 0.2
+                    prov = "VALIDATED_OBSERVATION"
+
+                # Check IP match
                 if ok.get("ip") == ct.get("ip") and ok.get("ip") != "0.0.0.0":
                     basis.append("ip_match")
-                    conf += 0.2
+                    conf += 0.15
 
                 link_id = f"link-{ok['event_id']}-{ct['event_id']}"
                 links.append(IdentityLink(
@@ -53,33 +86,50 @@ def stitch_identity_events(events: List[Dict[str, Any]]) -> Tuple[List[IdentityL
                     provenance=prov
                 ))
 
-        # Build chain stages from observed attack-pattern events
+        # Build chronological chain stages from semantics
+        prev_stage = None
         for e in sorted_evts:
             action = e.get("action", "")
+            resource = e.get("resource", "").lower()
             stage_name = None
-            if "AttachUserPolicy" in action:
-                stage_name = "PRIVILEGE_ESCALATION"
-            elif "AssumeRole" in action:
-                stage_name = "SESSION_ASSUMPTION"
-            elif "user.session.start" in action:
+
+            if "user.session.start" in action or "login" in action.lower() or "authentication" in action.lower():
                 stage_name = "INITIAL_AUTHENTICATION"
-            elif "pii-vault" in e.get("resource", "") or "production_export" in e.get("resource", ""):
+            elif "AssumeRole" in action or "GetSessionToken" in action:
+                stage_name = "SESSION_ASSUMPTION"
+            elif any(act in action for act in ["AttachUserPolicy", "AttachRolePolicy", "PutUserPolicy", "PutRolePolicy", "CreateAccessKey"]):
+                stage_name = "PRIVILEGE_ESCALATION"
+            elif "pii-vault" in resource or "production_export" in resource or "customer-pii" in resource or "secret" in resource:
                 stage_name = "DATA_EXFILTRATION_ATTEMPT"
 
+            # Deduplicate stages: ensure INITIAL_AUTHENTICATION only appears at sequence start
             if stage_name:
-                stages.append(ChainStage(
-                    stage=stage_name,
-                    event_ref=e["event_id"],
-                    link_provenance="VALIDATED_OBSERVATION" if e.get("source") == "cloudtrail" else "LABEL_DERIVED"
-                ))
+                if stage_name == "INITIAL_AUTHENTICATION" and any(s.stage == "INITIAL_AUTHENTICATION" for s in stages):
+                    continue
+                if stage_name != prev_stage:
+                    stages.append(ChainStage(
+                        stage=stage_name,
+                        event_ref=e["event_id"],
+                        link_provenance="VALIDATED_OBSERVATION"
+                    ))
+                    prev_stage = stage_name
 
-        if len(stages) > 1:
+        if len(stages) >= 2:
+            stage_event_refs = {s.event_ref for s in stages}
+            matched_links = [l.link_id for l in links if l.from_subject in stage_event_refs or l.to_subject in stage_event_refs]
+            
+            chain_conf = 0.75
+            if any(s.stage == "PRIVILEGE_ESCALATION" for s in stages):
+                chain_conf += 0.15
+            if any(s.stage == "DATA_EXFILTRATION_ATTEMPT" for s in stages):
+                chain_conf += 0.10
+
             chains.append(IncidentChain(
                 incident_id=incident_id,
                 stages=stages,
-                links=[l.link_id for l in links if l.from_subject in [s.event_ref for s in stages] or l.to_subject in [s.event_ref for s in stages]],
+                links=matched_links[:10],
                 subject_ids=[ident],
-                confidence=0.95 if any(s.stage == "PRIVILEGE_ESCALATION" for s in stages) else 0.75,
+                confidence=min(1.0, chain_conf),
                 unresolved=[]
             ))
 

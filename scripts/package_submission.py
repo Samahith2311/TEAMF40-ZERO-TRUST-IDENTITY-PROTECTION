@@ -1,6 +1,7 @@
 import zipfile
 import os
 import sys
+import fnmatch
 from pathlib import Path
 
 EXCLUDED_DIRS = {
@@ -9,31 +10,61 @@ EXCLUDED_DIRS = {
     "__pycache__",
     ".pytest_cache",
     ".vite",
-    "dist"
+    "dist",
+    "certs",
+    "data",
+    "cybersecurity-vibecoding-skillpack",
+    ".system_generated"
 }
 
 EXCLUDED_FILES = {
     ".DS_Store",
     "desktop.ini",
-    ".env"
+    ".env",
+    "zero_trust_track2_submission.zip"
 }
 
+EXCLUDED_PATTERNS = [
+    "*.zip",
+    "*.pyc",
+    "MASTER_*.md",
+    "*.pdf",
+    "*.swp"
+]
+
+def should_exclude(rel_path: Path) -> bool:
+    # Check directory components
+    for part in rel_path.parts[:-1]:
+        if part in EXCLUDED_DIRS:
+            return True
+        for pat in EXCLUDED_PATTERNS:
+            if fnmatch.fnmatch(part, pat):
+                return True
+
+    # Check file name
+    file_name = rel_path.name
+    if file_name in EXCLUDED_FILES:
+        return True
+    for pat in EXCLUDED_PATTERNS:
+        if fnmatch.fnmatch(file_name, pat):
+            return True
+
+    return False
+
 def create_submission_package(output_zip: str = "zero_trust_track2_submission.zip") -> str:
-    root = Path.cwd()
+    root = Path(__file__).resolve().parent.parent
     out_path = root / output_zip
 
     total_files = 0
     with zipfile.ZipFile(out_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
-        for p in root.rglob("*"):
+        for p in sorted(root.rglob("*")):
             if not p.is_file():
                 continue
-            rel_parts = p.relative_to(root).parts
-            if any(part in EXCLUDED_DIRS for part in rel_parts):
-                continue
-            if p.name in EXCLUDED_FILES or p.name.endswith(".pyc") or p.name == output_zip:
+            rel_p = p.relative_to(root)
+            if should_exclude(rel_p):
                 continue
 
-            rel_str = str(p.relative_to(root))
+            rel_str = str(rel_p).replace("\\", "/")
             zf.write(p, arcname=rel_str)
             total_files += 1
 
@@ -51,4 +82,3 @@ def create_submission_package(output_zip: str = "zero_trust_track2_submission.zi
 
 if __name__ == "__main__":
     create_submission_package()
-

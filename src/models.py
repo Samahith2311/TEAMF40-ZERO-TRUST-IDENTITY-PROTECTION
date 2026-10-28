@@ -13,8 +13,10 @@ class NormalizedEvent(BaseModel):
     ts_utc: str
     ts_original_tz: Optional[str] = None
     identity_key: str
+    identity_candidates: List[str] = Field(default_factory=list)
     principal_raw: str
     session_id: Optional[str] = None
+    request_id: Optional[str] = None
     ip: str
     geo: Dict[str, Any] = Field(default_factory=dict)
     user_agent: str
@@ -22,8 +24,21 @@ class NormalizedEvent(BaseModel):
     resource: str
     outcome: Literal["SUCCESS", "FAILURE", "UNKNOWN"] = "SUCCESS"
     privilege_context: Dict[str, Any] = Field(default_factory=dict)
+    cert_fingerprint: Optional[str] = None
     raw_hash: str
     validation: ValidationDetails = Field(default_factory=ValidationDetails)
+
+class DetectorFinding(BaseModel):
+    rule_id: str
+    detected: bool
+    status: Literal["DETECTED", "NOT_DETECTED", "INCONCLUSIVE"] = "NOT_DETECTED"
+    attack_type: Optional[str] = None
+    severity: Literal["LOW", "MEDIUM", "HIGH", "CRITICAL"] = "LOW"
+    confidence: float = 1.0
+    event_id: str
+    evidence: str = ""
+    evidence_refs: List[Dict[str, Any]] = Field(default_factory=list)
+    rationale: str = ""
 
 class ValidationResult(BaseModel):
     record_ref: str
@@ -40,7 +55,7 @@ class IdentityLink(BaseModel):
     to_subject: str
     basis: List[str] = Field(default_factory=list)
     confidence: float
-    provenance: Literal["LABEL_DERIVED", "VALIDATED_OBSERVATION", "ANALYTICAL_INFERENCE"]
+    provenance: Literal["LABEL_DERIVED", "VALIDATED_OBSERVATION", "ANALYTICAL_INFERENCE", "DERIVED", "INFERENCE"]
 
 class RiskFactor(BaseModel):
     name: str
@@ -58,6 +73,8 @@ class RiskScore(BaseModel):
 class EvidenceRef(BaseModel):
     source_file: str
     record_id: str
+    raw_hash: Optional[str] = None
+    matched_fields: Dict[str, Any] = Field(default_factory=dict)
 
 class Alert(BaseModel):
     alert_id: str

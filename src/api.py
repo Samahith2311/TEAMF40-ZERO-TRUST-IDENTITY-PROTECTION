@@ -186,3 +186,58 @@ def trigger_step_up(payload: Dict[str, Any] = Body(...)):
         "label": "SIMULATED",
         "prompt": f"Simulated MFA push prompt delivered to hardware token for user '{target}'."
     }
+
+# --- Risk-Adaptive mTLS Endpoints (Phase 7) ---
+
+@app.post("/api/mtls/bind")
+def api_bind_mtls_session(payload: Dict[str, Any] = Body(...)):
+    from src.mtls import get_binding_store
+    identity = sanitize_query_param(payload.get("identity"))
+    session_id = sanitize_query_param(payload.get("session_id"))
+    fingerprint = sanitize_query_param(payload.get("fingerprint"))
+
+    if not (identity and session_id and fingerprint):
+        raise HTTPException(status_code=400, detail="Missing required parameters: identity, session_id, fingerprint")
+
+    store = get_binding_store()
+    rec = store.bind(identity, session_id, fingerprint)
+    return {"status": "SUCCESS", "binding": rec}
+
+@app.post("/api/mtls/decide")
+def api_mtls_decide(payload: Dict[str, Any] = Body(...)):
+    from src.mtls import evaluate_mtls_decision
+    identity = sanitize_query_param(payload.get("identity"))
+    session_id = sanitize_query_param(payload.get("session_id"))
+    cert_fp = sanitize_query_param(payload.get("cert_fingerprint"))
+    risk_score = payload.get("current_risk_score")
+
+    if not (identity and session_id):
+        raise HTTPException(status_code=400, detail="Missing identity or session_id")
+
+    decision = evaluate_mtls_decision(
+        identity=identity,
+        session_id=session_id,
+        peer_fingerprint=cert_fp,
+        current_risk_score=risk_score
+    )
+    return decision
+
+@app.get("/api/mtls/stats")
+def api_mtls_stats():
+    from src.mtls import get_decision_cache
+    return {"stats": get_decision_cache().stats()}
+
+@app.post("/api/mtls/approve-rotation")
+def api_approve_rotation(payload: Dict[str, Any] = Body(...)):
+    from src.mtls import get_binding_store
+    identity = sanitize_query_param(payload.get("identity"))
+    session_id = sanitize_query_param(payload.get("session_id"))
+    new_fp = sanitize_query_param(payload.get("new_fingerprint"))
+    approver = sanitize_query_param(payload.get("approver", "sec_ops@corp.internal"))
+
+    if not (identity and session_id and new_fp):
+        raise HTTPException(status_code=400, detail="Missing required parameters")
+
+    store = get_binding_store()
+    ok = store.approve_rotation(identity, session_id, new_fp, approver)
+    return {"status": "ROTATION_APPROVED", "identity": identity, "session_id": session_id, "approved_fingerprint": new_fp}

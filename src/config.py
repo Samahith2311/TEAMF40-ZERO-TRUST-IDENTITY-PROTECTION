@@ -25,4 +25,5 @@ COLLECTIONS = {
     "simulator_actions": "simulator_actions",
     "audit_logs": "audit_logs",
     "eval_results": "eval_results",
+    "evaluation_labels": "evaluation_labels",
 }
