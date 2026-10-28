@@ -133,7 +133,7 @@ export default function App() {
   // Live Attack Simulation State (Visual step-by-step kill-chain animation)
   const [simStep, setSimStep] = useState<number>(0) // 0: Idle, 1: Infiltration, 2: Token Abuse, 3: STS Role, 4: PrivEsc, 5: Exfiltration, 6: Revocation
   const [isSimulating, setIsSimulating] = useState<boolean>(false)
-  const [simSpeed, setSimSpeed] = useState<number>(1400) // ms per step
+  const [simSpeed] = useState<number>(1400) // ms per step
   const simTimerRef = useRef<any>(null)
 
   const startAttackSimulation = () => {
@@ -421,7 +421,6 @@ export default function App() {
   ]))
   const otherIdentities = allIdentities.filter(id => id !== hopIdentity)
   const identitySlot1 = otherIdentities[0] || 'alice@corp.internal'
-  const identitySlot2 = hopIdentity // Active attacker in slot 2
   const identitySlot3 = otherIdentities[1] || 'charlie.analyst@corp.internal'
   const identitySlot4 = otherIdentities.find(id => id.includes('admin') || id.includes('diana')) || otherIdentities[2] || 'diana.admin@corp.internal'
 
@@ -447,8 +446,81 @@ export default function App() {
   ]))
   const otherResources = allResources.filter(r => r !== hopResource)
   const resourceSlot1 = otherResources[0] || 'corp-analytics-raw'
-  const resourceSlot2 = hopResource // Exfiltration target
   const resourceSlot3 = otherResources[1] || 'corp-dev-builds'
+
+  // Plain-English translations paired with technical subtitles (Dual-Layer Pattern)
+  const getFactorDisplay = (factorName: string): { primary: string; explanation: string; technical: string } => {
+    const map: Record<string, { primary: string; explanation: string; technical: string }> = {
+      privilege_delta: {
+        primary: 'Unusual Admin Access',
+        explanation: 'User suddenly requested elevated administrative cloud permissions',
+        technical: 'Privilege Delta / IAM Escalation'
+      },
+      impossible_travel: {
+        primary: 'Suspicious Location Jump',
+        explanation: 'Logins from two distant geographical locations within impossible timeframe',
+        technical: 'Impossible Travel / Geo-Velocity Anomaly'
+      },
+      token_abuse: {
+        primary: 'Hijacked Session Token',
+        explanation: 'Active login token presented from an unrecognized device or network',
+        technical: 'Token Abuse / ASN-IP Drift / Cert Mismatch'
+      },
+      dormancy_reactivation: {
+        primary: 'Inactive Account Woken Up',
+        explanation: 'Dormant user account suddenly active after weeks of silence',
+        technical: 'Dormancy Reactivation Delta'
+      },
+      blast_radius: {
+        primary: 'Systems at Risk',
+        explanation: 'Sensitive cloud data stores and customer vaults reachable by principal',
+        technical: 'Blast Radius / Lateral Movement'
+      },
+      behavioral_anomaly: {
+        primary: 'Abnormal Behavior Pattern',
+        explanation: 'Significant deviation from baseline user telemetry and activity',
+        technical: 'Behavioral Anomaly Score'
+      },
+      privilege_level: {
+        primary: 'High-Impact Identity Role',
+        explanation: 'Principal holds critical administrative scope across infrastructure',
+        technical: 'Tier-1 High Privilege Scope'
+      }
+    }
+    return map[factorName] || {
+      primary: factorName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      explanation: 'Risk indicator evaluated by multi-factor engine',
+      technical: factorName
+    }
+  }
+
+  const getStageDisplay = (stage: string): { primary: string; technical: string } => {
+    const map: Record<string, { primary: string; technical: string }> = {
+      INITIAL_AUTHENTICATION: { primary: '1. Initial User Login', technical: 'Okta System Log Ingestion' },
+      SESSION_HIJACK: { primary: '2. Session Hijack Detected', technical: 'Token Theft & Client Drift' },
+      STS_ROLE_ASSUMPTION: { primary: '3. Cloud Service Role Assumed', technical: 'AWS STS AssumeRole API' },
+      IAM_PRIVILEGE_ESCALATION: { primary: '4. Unusual Admin Access Attached', technical: 'IAM Policy Escalation' },
+      RESOURCE_EXFILTRATION: { primary: '5. Critical Vault Exfiltration Attempt', technical: 'S3 GetObject Sensitive Vault' }
+    }
+    return map[stage] || { primary: stage.replace(/_/g, ' '), technical: stage }
+  }
+
+  const getProvenanceDisplay = (prov: string): { primary: string; technical: string } => {
+    if (prov === 'VALIDATED_OBSERVATION') {
+      return { primary: 'Verified Telemetry', technical: 'VALIDATED_OBSERVATION' }
+    }
+    return { primary: 'AI Graph Inferred', technical: prov }
+  }
+
+  const getActionDisplay = (action: string): { primary: string; technical: string } => {
+    const map: Record<string, { primary: string; technical: string }> = {
+      REVOKE_SESSION: { primary: 'Isolate Account & Kill Session', technical: 'REVOKE_SESSION' },
+      STEP_UP_AUTH: { primary: 'Require Extra Verification (Step-Up MFA)', technical: 'STEP_UP_AUTH' },
+      QUARANTINE_IDENTITY: { primary: 'Quarantine Identity', technical: 'QUARANTINE_IDENTITY' },
+      RESTRICT_PERMISSIONS: { primary: 'Restrict Admin Permissions', technical: 'RESTRICT_PERMISSIONS' }
+    }
+    return map[action] || { primary: action.replace(/_/g, ' '), technical: action }
+  }
 
   return (
     <div className="h-screen w-screen bg-black text-zinc-200 flex flex-col font-sans overflow-hidden select-none">
@@ -456,9 +528,9 @@ export default function App() {
       <div className="bg-[#08080b] border-b border-[#181820] px-4 py-1.5 text-center text-[11px] font-mono tracking-wider text-zinc-400 flex items-center justify-between shrink-0">
         <div className="flex items-center space-x-2.5">
           <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
-          <span className="text-zinc-300 font-medium">AEGIS ZERO TRUST IDENTITY ENGINE</span>
+          <span className="text-zinc-200 font-semibold tracking-normal">AEGIS ZERO TRUST // Cloud Identity Defense</span>
           <span className="text-zinc-600">•</span>
-          <span className="text-zinc-500">SYNCHRONOUS MULTI-STAGE REPLAY & SYNTHETIC TELEMETRY</span>
+          <span className="text-zinc-400">Automated Multi-Stage Attack Defense (Okta &amp; AWS CloudTrail Stream)</span>
         </div>
 
         {/* Top Right Utility Group */}
@@ -470,10 +542,10 @@ export default function App() {
                 ? 'bg-cyan-950/80 border-cyan-500/70 text-cyan-200 shadow-[0_0_12px_rgba(56,189,248,0.2)]'
                 : 'bg-[#0e121a] hover:bg-[#151d2a] border-cyan-800/40 text-cyan-300'
             }`}
-            title="Open Model Tuning"
+            title="Open Self-Tuning Risk Model"
           >
             <span className="text-xs">⚙️</span>
-            <span className="font-semibold">Model Tuning</span>
+            <span className="font-semibold">Self-Tuning Risk Model</span>
             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
           </button>
           <span className="px-2 py-1 rounded bg-[#101017] border border-[#222230] text-cyan-300">FastAPI :8000</span>
@@ -538,10 +610,10 @@ export default function App() {
           {/* Embedded Navigation Options (Lift-Up on Hover) */}
           <div className="space-y-2.5">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-400 px-1">
-              Modules
+              Security Modules
             </span>
 
-            {/* Option 1: Incident Queue */}
+            {/* Option 1: Live Incident Queue */}
             <div
               onClick={() => setActiveTab('details')}
               className={`group cursor-pointer rounded-xl p-3 border transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-[0_12px_24px_-6px_rgba(56,189,248,0.18)] ${
@@ -559,20 +631,20 @@ export default function App() {
                   </div>
                   <div>
                     <h4 className={`text-xs font-semibold tracking-wide ${activeTab === 'details' ? 'text-white' : 'text-zinc-300 group-hover:text-white'}`}>
-                      Incident Queue
+                      Live Incident Queue
                     </h4>
-                    <p className="text-[10px] text-zinc-400">Correlated threat alerts</p>
+                    <p className="text-[10px] text-zinc-400">Okta &amp; CloudTrail Stream</p>
                   </div>
                 </div>
                 <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
                   activeTab === 'details' ? 'bg-cyan-950 text-cyan-300 border border-cyan-700/50' : 'bg-[#15151e] text-zinc-400'
                 }`}>
-                  {alerts.length}
+                  {alerts.length} Alerts
                 </span>
               </div>
             </div>
 
-            {/* Option 2: Live Attack Graph */}
+            {/* Option 2: Attack Timeline & Blast Radius */}
             <div
               onClick={() => setActiveTab('graph')}
               className={`group cursor-pointer rounded-xl p-3 border transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-[0_12px_24px_-6px_rgba(56,189,248,0.18)] ${
@@ -590,16 +662,16 @@ export default function App() {
                   </div>
                   <div>
                     <h4 className={`text-xs font-semibold tracking-wide ${activeTab === 'graph' ? 'text-white' : 'text-zinc-300 group-hover:text-white'}`}>
-                      Live Attack Graph
+                      Attack Timeline &amp; Blast Radius
                     </h4>
-                    <p className="text-[10px] text-zinc-400">Interactive bubble canvas</p>
+                    <p className="text-[10px] text-zinc-400">Automated Attack Path DAG</p>
                   </div>
                 </div>
                 <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
               </div>
             </div>
 
-            {/* Option 3: Model Tuning */}
+            {/* Option 3: Self-Tuning Risk Model */}
             <div
               onClick={() => setActiveTab('tuning')}
               className={`group cursor-pointer rounded-xl p-3 border transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-[0_12px_24px_-6px_rgba(56,189,248,0.18)] ${
@@ -617,9 +689,9 @@ export default function App() {
                   </div>
                   <div>
                     <h4 className={`text-xs font-semibold tracking-wide ${activeTab === 'tuning' ? 'text-white' : 'text-zinc-300 group-hover:text-white'}`}>
-                      Model Tuning
+                      Self-Tuning Risk Model
                     </h4>
-                    <p className="text-[10px] text-zinc-400">Autonomous calibration</p>
+                    <p className="text-[10px] text-zinc-400">Autonomous Calibration &amp; Safeguards</p>
                   </div>
                 </div>
                 <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
@@ -630,7 +702,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* Option 4: mTLS Decision Cache */}
+            {/* Option 4: Speed & Security Monitor (mTLS) */}
             <div
               onClick={() => {
                 setActiveTab('mtls')
@@ -654,15 +726,15 @@ export default function App() {
                   </div>
                   <div>
                     <h4 className={`text-xs font-semibold tracking-wide ${activeTab === 'mtls' ? 'text-white' : 'text-zinc-300 group-hover:text-white'}`}>
-                      mTLS Decision Cache
+                      Speed &amp; Security Monitor (mTLS)
                     </h4>
-                    <p className="text-[10px] text-zinc-400">Risk-adaptive fast path</p>
+                    <p className="text-[10px] text-zinc-400">Zero-Lag Session Verification</p>
                   </div>
                 </div>
                 <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
                   activeTab === 'mtls' ? 'bg-cyan-950 text-cyan-300 border border-cyan-700/50' : 'bg-[#15151e] text-cyan-400'
                 }`}>
-                  Phase 7
+                  RFC 8705
                 </span>
               </div>
             </div>
@@ -671,10 +743,13 @@ export default function App() {
           {/* Embedded Threat Generator Console (Lift-Up on Hover) */}
           <div className="group rounded-xl p-3.5 border border-[#1a1a24] bg-[#08080c] shadow-[inset_0_2px_4px_rgba(0,0,0,0.8)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_24px_-6px_rgba(56,189,248,0.14)] hover:border-cyan-500/40 hover:bg-[#0d0e14] space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-400">
-                Threat Generator
-              </span>
-              <span className="text-[10px] font-mono text-cyan-400/90">Autonomous</span>
+              <div>
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-300 block">
+                  Attack Simulator &amp; Test Center
+                </span>
+                <span className="text-[9px] text-zinc-400 font-mono">Autonomous Threat Replay</span>
+              </div>
+              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-cyan-950/60 text-cyan-400 border border-cyan-800/40">Live Sim</span>
             </div>
 
             <div className="space-y-2">
@@ -684,11 +759,11 @@ export default function App() {
                 onChange={e => setSelectedArchetype(e.target.value)}
                 className="w-full bg-[#121218] border border-[#242432] text-zinc-200 text-xs rounded-lg px-2.5 py-1.5 outline-none font-mono cursor-pointer focus:border-cyan-500/50"
               >
-                <option value="RANDOM">🎲 Random Threat Archetype</option>
-                <option value="DORMANT_PRIV_ESCALATION">🛡️ Dormant Account Escalation</option>
-                <option value="IMPOSSIBLE_TRAVEL_TOKEN_HIJACK">✈️ Impossible Travel & Hijack</option>
-                <option value="LATERAL_ROLE_PIVOT_EXFIL">🔄 Lateral Role Pivot & Exfil</option>
-                <option value="UNUSUAL_AUTOMATED_API_SWEEP">⚡ Unusual Automated API Sweep</option>
+                <option value="RANDOM">🎲 Random Threat Scenario</option>
+                <option value="DORMANT_PRIV_ESCALATION">🛡️ Inactive Account Woken Up (Dormant Escalation)</option>
+                <option value="IMPOSSIBLE_TRAVEL_TOKEN_HIJACK">✈️ Suspicious Location Jump (Impossible Travel)</option>
+                <option value="LATERAL_ROLE_PIVOT_EXFIL">🔄 Systems at Risk: Role Pivot &amp; Exfil Attempt</option>
+                <option value="UNUSUAL_AUTOMATED_API_SWEEP">⚡ Rapid Automated API Scraping (Unusual Sweep)</option>
               </select>
 
               <button
@@ -696,7 +771,7 @@ export default function App() {
                 disabled={generating}
                 className="w-full py-2 px-3 rounded-lg text-xs font-semibold bg-gradient-to-r from-sky-600/80 to-teal-600/80 hover:from-sky-500/90 hover:to-teal-500/90 disabled:opacity-40 text-white shadow-sm transition-all cursor-pointer flex items-center justify-center space-x-2"
               >
-                <span>{generating ? 'Synthesizing...' : '⚡ Generate Attack'}</span>
+                <span>{generating ? 'Simulating Attack Vector...' : '⚡ Launch Simulated Attack'}</span>
               </button>
 
               <button
@@ -708,7 +783,7 @@ export default function App() {
                 }`}
               >
                 <span className={`w-2 h-2 rounded-full ${autoStream ? 'bg-emerald-400 animate-ping' : 'bg-zinc-600'}`}></span>
-                <span>{autoStream ? 'Streaming Active (6s)' : '▶ Auto-Stream Attacks'}</span>
+                <span>{autoStream ? 'Streaming Active (6s)' : '▶ Auto-Stream Threat Scenarios'}</span>
               </button>
             </div>
           </div>
@@ -719,9 +794,12 @@ export default function App() {
               onClick={() => setMaskIdentities(!maskIdentities)}
               className="w-full py-2 px-3 rounded-xl border border-[#1a1a24] bg-[#08080c] shadow-[inset_0_2px_4px_rgba(0,0,0,0.8)] hover:-translate-y-1 hover:border-cyan-500/40 hover:bg-[#0d0e14] transition-all duration-300 cursor-pointer flex items-center justify-between"
             >
-              <span className="font-mono text-[11px] text-zinc-300">Identity Privacy</span>
+              <div>
+                <span className="font-mono text-[11px] text-zinc-200 block text-left font-semibold">Executive Privacy Mode</span>
+                <span className="text-[9px] text-zinc-500 text-left block">Mask Identifiers &amp; PII</span>
+              </div>
               <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-[#121218] text-cyan-300 border border-[#222230]">
-                {maskIdentities ? '🔒 Masked' : '👁️ Unmasked'}
+                {maskIdentities ? '🔒 PII Masked' : '👁️ PII Visible'}
               </span>
             </button>
             <div className="text-[10px] font-mono text-zinc-400 text-center">
@@ -744,6 +822,12 @@ export default function App() {
           {/* --- TAB 1: INCIDENTS --- */}
           {activeTab === 'details' && (
             <div className="space-y-6">
+              {/* Executive 1-Line Summary Banner */}
+              <div className="p-3 bg-[#0a0f1d] border border-cyan-900/40 rounded-xl text-xs text-cyan-200/90 font-sans flex items-center space-x-2.5">
+                <span className="text-base shrink-0">💡</span>
+                <span><strong className="text-white">Executive Summary:</strong> Real-time incident triage showing who is attacking, why it was flagged, and a safe one-click simulator to preview and block account takeovers without business downtime.</span>
+              </div>
+
               {selectedAlert ? (
                 <>
                   {/* Selected Incident Header */}
@@ -751,7 +835,7 @@ export default function App() {
                     <div className="flex items-start justify-between">
                       <div>
                         <div className="flex items-center space-x-2">
-                          <span className="text-xs font-mono text-cyan-400 uppercase tracking-wider">
+                          <span className="text-xs font-mono text-cyan-400 uppercase tracking-wider font-bold">
                             {selectedAlert.alert_id}
                           </span>
                           <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${
@@ -759,87 +843,126 @@ export default function App() {
                               ? 'bg-[#220a0d] text-rose-300 border-rose-800/50'
                               : 'bg-[#221606] text-amber-300 border-amber-800/50'
                           }`}>
-                            {selectedAlert.severity}
+                            {selectedAlert.severity} PRIORITY
+                          </span>
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#10141f] text-cyan-300 border border-cyan-800/40">
+                            Verified Telemetry
                           </span>
                         </div>
                         <h2 className="text-lg font-bold text-white mt-1.5">{selectedAlert.what}</h2>
-                        <p className="text-xs text-zinc-400 mt-1">{selectedAlert.why}</p>
+                        <p className="text-xs text-zinc-300 mt-1">{selectedAlert.why}</p>
                       </div>
                       <div className="text-right font-mono text-[11px] text-zinc-400">
-                        <div>First Seen: <span className="text-zinc-300">{selectedAlert.first_seen}</span></div>
-                        <div>Last Seen: <span className="text-zinc-300">{selectedAlert.last_seen}</span></div>
+                        <div>First Detected: <span className="text-zinc-300">{selectedAlert.first_seen}</span></div>
+                        <div>Last Active: <span className="text-zinc-300">{selectedAlert.last_seen}</span></div>
                       </div>
                     </div>
 
                     <div className="p-3 bg-[#0c0c12] border border-[#1e1e28] rounded-xl text-xs">
-                      <span className="text-zinc-400 font-semibold">Impact Assessment: </span>
+                      <span className="text-cyan-400 font-semibold font-mono">Business Impact Assessment: </span>
                       <span className="text-zinc-200">{selectedAlert.impact}</span>
                     </div>
                   </div>
 
-                  {/* Additive Factor Risk Score */}
+                  {/* Why Was This Flagged? (Additive Factor Risk Score) */}
                   {activeScore && (
                     <div className="p-6 border border-[#1c1c26] rounded-2xl bg-[#08080c] space-y-4 shadow-sm">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 font-mono">
-                            Additive Factor Risk Score
-                          </h3>
-                          <p className="text-xs text-zinc-400">Transparent additive weighted model (0–100)</p>
-                        </div>
-                        <div className="text-2xl font-black font-mono text-rose-400">
-                          {activeScore.total} <span className="text-xs text-zinc-400">/ 100</span>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2.5">
-                        {activeScore.factors.map(f => (
-                          <div key={f.name} className="space-y-1">
-                            <div className="flex items-center justify-between text-xs font-mono">
-                              <span className="text-zinc-300 capitalize">{f.name.replace(/_/g, ' ')}</span>
-                              <span className="text-cyan-300">+{f.contribution} pts ({(f.weight * 100).toFixed(1)}% wt)</span>
-                            </div>
-                            <div className="w-full bg-[#121218] h-1.5 rounded-full overflow-hidden border border-[#1f1f2a]">
-                              <div
-                                className="bg-gradient-to-r from-sky-400 to-teal-400 h-full rounded-full transition-all duration-500"
-                                style={{ width: `${Math.min(100, f.value)}%` }}
-                              ></div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className="p-3 bg-[#0c0c12] border border-[#1e1e28] rounded-xl text-xs space-y-1">
-                        <div className="text-zinc-400 font-semibold">Top Threat Signals:</div>
-                        <div className="flex flex-wrap gap-2 pt-1">
-                          {activeScore.explanation.top_factors.map(tf => (
-                            <span key={tf} className="px-2 py-0.5 rounded bg-[#10141f] text-cyan-300 border border-cyan-800/40 text-[11px] font-mono">
-                              {tf}
+                          <div className="flex items-center space-x-2">
+                            <h3 className="text-sm font-bold text-white font-sans">
+                              Why Was This Flagged?
+                            </h3>
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-800/40">
+                              Additive Factor Model (0–100)
                             </span>
-                          ))}
+                          </div>
+                          <p className="text-xs text-zinc-400 mt-0.5 font-sans">
+                            Top Risk Drivers &amp; How to Lower Risk (Transparent additive score attribution)
+                          </p>
+                        </div>
+                        <div className="text-right font-mono">
+                          <div className="text-2xl font-black text-rose-400">
+                            {activeScore.total} <span className="text-xs text-zinc-400">/ 100</span>
+                          </div>
+                          <span className="text-[10px] text-rose-300/80 uppercase font-bold tracking-wider">
+                            {activeScore.total >= 80 ? 'CRITICAL RISK' : activeScore.total >= 50 ? 'HIGH RISK' : 'ELEVATED RISK'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3 pt-1">
+                        {activeScore.factors.map(f => {
+                          const display = getFactorDisplay(f.name)
+                          return (
+                            <div key={f.name} className="p-3 rounded-xl border border-[#181822] bg-[#0b0b10] space-y-1.5 hover:border-cyan-500/30 transition-all">
+                              <div className="flex items-center justify-between text-xs">
+                                <div>
+                                  <span className="font-bold text-white text-xs">{display.primary}</span>
+                                  <span className="text-zinc-500 font-mono text-[10px] ml-2">({display.technical})</span>
+                                </div>
+                                <span className="text-cyan-300 font-mono font-semibold">
+                                  +{f.contribution} pts <span className="text-zinc-500">({(f.weight * 100).toFixed(1)}% wt)</span>
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-zinc-400 font-sans leading-relaxed">
+                                {display.explanation}
+                              </p>
+                              <div className="w-full bg-[#121218] h-1.5 rounded-full overflow-hidden border border-[#1f1f2a]">
+                                <div
+                                  className="bg-gradient-to-r from-sky-400 to-teal-400 h-full rounded-full transition-all duration-500"
+                                  style={{ width: `${Math.min(100, f.value)}%` }}
+                                ></div>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+
+                      <div className="p-3 bg-[#0c0c12] border border-[#1e1e28] rounded-xl text-xs space-y-1.5">
+                        <div className="text-zinc-300 font-semibold font-sans">Primary Threat Indicators:</div>
+                        <div className="flex flex-wrap gap-2 pt-0.5">
+                          {activeScore.explanation.top_factors.map(tf => {
+                            const disp = getFactorDisplay(tf)
+                            return (
+                              <span key={tf} className="px-2.5 py-1 rounded-lg bg-[#10141f] text-cyan-200 border border-cyan-800/40 text-[11px] font-sans flex items-center space-x-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+                                <span><strong>{disp.primary}</strong> ({tf})</span>
+                              </span>
+                            )
+                          })}
                         </div>
                       </div>
                     </div>
                   )}
 
-                  {/* Reconstructed Attack Chain Timeline */}
+                  {/* Attack Timeline & Blast Radius (Reconstructed Attack Chain Timeline) */}
                   <div className="p-6 border border-[#1c1c26] rounded-2xl bg-[#08080c] space-y-4 shadow-sm">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 font-mono">
-                          Correlated Attack Chain Timeline
-                        </h3>
-                        <p className="text-xs text-zinc-400">Cross-source provenance stages</p>
+                        <div className="flex items-center space-x-2">
+                          <h3 className="text-sm font-bold text-white font-sans">
+                            Attack Timeline &amp; Blast Radius
+                          </h3>
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-800/40">
+                            Kill Chain Timeline
+                          </span>
+                        </div>
+                        <p className="text-xs text-zinc-400 mt-0.5 font-sans">
+                          Automated Attack Path Reconstruction (Cross-source Okta &amp; AWS event correlation)
+                        </p>
                       </div>
                       {activeChain && (
                         <span className="text-xs font-mono text-emerald-400 border border-emerald-800/50 bg-[#071712] px-2.5 py-0.5 rounded-full">
-                          Confidence: {(activeChain.confidence * 100).toFixed(0)}%
+                          AI Reconstruction Confidence: {(activeChain.confidence * 100).toFixed(0)}%
                         </span>
                       )}
                     </div>
 
                     <div className="relative pl-6 space-y-5 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-[#1f1f2b]">
                       {activeChain?.stages.map((st, idx) => {
+                        const stageInfo = getStageDisplay(st.stage)
+                        const provInfo = getProvenanceDisplay(st.link_provenance)
                         const provColor =
                           st.link_provenance === 'VALIDATED_OBSERVATION'
                             ? 'border-emerald-500/70 bg-[#06140e] text-emerald-300'
@@ -849,9 +972,12 @@ export default function App() {
                           <div key={idx} className="relative">
                             <span className={`absolute -left-[27px] top-1 w-3 h-3 rounded-full border-2 ${provColor}`}></span>
                             <div className="flex items-center justify-between">
-                              <h4 className="text-xs font-semibold text-white">{st.stage.replace(/_/g, ' ')}</h4>
+                              <div>
+                                <h4 className="text-xs font-bold text-white">{stageInfo.primary}</h4>
+                                <span className="text-[10px] text-zinc-400 font-mono">({stageInfo.technical})</span>
+                              </div>
                               <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${provColor}`}>
-                                {st.link_provenance}
+                                {provInfo.primary}
                               </span>
                             </div>
                             <p className="text-[11px] font-mono text-zinc-400 mt-0.5">Event Ref: {st.event_ref}</p>
@@ -861,39 +987,52 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* Policy Action Simulator */}
+                  {/* Response & Containment (Policy Containment Simulator) */}
                   <div className="p-6 border border-[#1c1c26] rounded-2xl bg-[#08080c] space-y-4 shadow-sm">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 font-mono">
-                          Policy Containment Simulator
-                        </h3>
-                        <p className="text-xs text-zinc-400">Zero Trust automated mitigation</p>
+                        <div className="flex items-center space-x-2">
+                          <h3 className="text-sm font-bold text-white font-sans">
+                            Response &amp; Containment
+                          </h3>
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-800/40">
+                            Safe Simulate-First Action Center
+                          </span>
+                        </div>
+                        <p className="text-xs text-zinc-400 mt-0.5 font-sans">
+                          Safe Test Mode (Preview Impact Before Blocking) • Zero Business Downtime
+                        </p>
                       </div>
-                      <span className="text-xs font-mono px-2 py-0.5 rounded bg-[#1e1406] text-amber-300 border border-amber-800/40">
-                        Action: {selectedAlert.recommended_action}
+                      <span className="text-xs font-mono px-2.5 py-1 rounded bg-[#1e1406] text-amber-300 border border-amber-800/40">
+                        Target Action: {getActionDisplay(selectedAlert.recommended_action).primary}
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-end space-x-3 pt-2">
+                    {/* Emergency Admin Safeguard Banner */}
+                    <div className="p-2.5 bg-[#091510] border border-emerald-800/40 rounded-xl text-xs text-emerald-300 flex items-center space-x-2">
+                      <span className="text-base shrink-0">🛡️</span>
+                      <span><strong>Emergency Admin Safeguard Active:</strong> Critical system personnel and break-glass accounts are protected from accidental lockouts (Deny Path Enforced).</span>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-end gap-3 pt-2">
                       <button
                         onClick={handleStepUp}
-                        className="px-4 py-2 rounded-lg text-xs font-medium border border-[#2b2b3a] bg-[#121218] hover:bg-[#181822] text-cyan-200 transition-colors cursor-pointer"
+                        className="px-4 py-2 rounded-lg text-xs font-semibold border border-[#2b2b3a] bg-[#121218] hover:bg-[#181822] text-cyan-200 transition-colors cursor-pointer"
                       >
-                        Simulate Step-Up MFA
+                        Safe Test Mode: Require Extra Verification (Step-Up MFA)
                       </button>
 
                       {simResult ? (
                         <span className="px-4 py-2 rounded-lg text-xs font-mono bg-[#061710] text-emerald-300 border border-emerald-800/50 flex items-center">
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-2"></span>
-                          Result: {simResult} (SIMULATED)
+                          Result: {simResult} (SIMULATED PREVIEW)
                         </span>
                       ) : (
                         <button
                           onClick={handleApprove}
                           className="px-5 py-2 rounded-lg text-xs font-semibold bg-rose-600/80 hover:bg-rose-500 text-white shadow transition-all cursor-pointer"
                         >
-                          Authorize Simulated {selectedAlert.recommended_action}
+                          Safe Test Mode: Authorize Simulated {getActionDisplay(selectedAlert.recommended_action).primary}
                         </button>
                       )}
                     </div>
@@ -907,7 +1046,7 @@ export default function App() {
                 </>
               ) : (
                 <div className="p-12 text-center border border-[#1c1c26] rounded-2xl bg-[#08080c] text-zinc-400 text-xs font-mono">
-                  No incident selected. Select an alert from the left or trigger "⚡ Generate Attack".
+                  No incident selected. Select an alert from the left or trigger "⚡ Launch Simulated Attack".
                 </div>
               )}
             </div>
@@ -916,12 +1055,18 @@ export default function App() {
           {/* --- TAB 2: LIVE ATTACK GRAPH (Interactive Swimlane Kill-Chain DAG) --- */}
           {activeTab === 'graph' && (
             <div className="space-y-3">
+              {/* Executive 1-Line Summary Banner */}
+              <div className="p-3 bg-[#0a0f1d] border border-cyan-900/40 rounded-xl text-xs text-cyan-200/90 font-sans flex items-center space-x-2.5">
+                <span className="text-base shrink-0">💡</span>
+                <span><strong className="text-white">Executive Summary:</strong> Visual kill chain tracing how stolen credentials penetrate internal sessions, pivot through cloud roles, and attempt data theft against customer vaults—stopping attacks before exfiltration.</span>
+              </div>
+
               <div className="p-4 border border-[#1c1c26] rounded-2xl bg-[#08080c] space-y-3 shadow-sm">
                 {/* Header & Controls */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-2.5 pb-2 border-b border-[#161622]">
                   <div>
                     <h2 className="text-sm font-bold text-white flex items-center space-x-2">
-                      <span>Live Attack Graph &amp; Kill-Chain DAG</span>
+                      <span>Attack Timeline &amp; Blast Radius</span>
                       <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${
                         isSimulating ? 'bg-rose-950 text-rose-300 border border-rose-800/60 animate-pulse' : 'bg-[#061710] text-emerald-300 border border-emerald-800/40'
                       }`}>
@@ -929,7 +1074,7 @@ export default function App() {
                       </span>
                     </h2>
                     <p className="text-[11px] text-zinc-400">
-                      Sequential attack propagation: Infiltration → Token Abuse → STS Role Assumption → IAM Privilege Escalation → Vault Exfiltration
+                      Automated Attack Path Reconstruction: Infiltration → Hijacked Session → Cloud Role → Unusual Admin Access → Data Vault
                     </p>
                   </div>
 
@@ -970,7 +1115,7 @@ export default function App() {
                           onClick={startAttackSimulation}
                           className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 text-white text-[11px] font-bold cursor-pointer transition-all flex items-center space-x-1 shadow-sm"
                         >
-                          <span>▶ Play Simulation</span>
+                          <span>▶ Play Attack Simulation</span>
                         </button>
                       )}
                       <button
@@ -997,13 +1142,13 @@ export default function App() {
                         simStep === 5 ? 'bg-red-950 text-red-200 border border-red-700/60' :
                         'bg-emerald-950 text-emerald-300 border border-emerald-700/50'
                       }`}>
-                        {simStep === 0 && '⚪ IDLE • Click Play to Highlight Attack Arrows'}
-                        {simStep === 1 && '🚨 STEP 1/5: INFILTRATION ARROW'}
-                        {simStep === 2 && '⚡ STEP 2/5: TOKEN ABUSE & STS ARROWS'}
-                        {simStep === 3 && '🔑 STEP 3/5: STS ROLE ARROW'}
-                        {simStep === 4 && '⚡ STEP 4/5: PRIVILEGE ESCALATION ARROW'}
+                        {simStep === 0 && '⚪ READY • Click Play to Highlight Attack Arrows'}
+                        {simStep === 1 && '🚨 STEP 1/5: INFILTRATION ARROW (Okta Auth)'}
+                        {simStep === 2 && '⚡ STEP 2/5: TOKEN ABUSE & STS ROLE ARROWS'}
+                        {simStep === 3 && '🔑 STEP 3/5: STS ROLE ASSUMPTION ARROW'}
+                        {simStep === 4 && '⚡ STEP 4/5: UNUSUAL ADMIN ACCESS ARROW'}
                         {simStep === 5 && '🛑 STEP 5/5: VAULT EXFILTRATION ARROW'}
-                        {simStep === 6 && '🛡️ STEP 6: ZERO TRUST CONTAINMENT'}
+                        {simStep === 6 && '🛡️ STEP 6: AUTOMATED ZERO TRUST CONTAINMENT'}
                       </span>
 
                       <span className="text-zinc-400 text-[11px]">
@@ -1017,7 +1162,7 @@ export default function App() {
                         { step: 1, label: '1. Infiltrate' },
                         { step: 2, label: '2. Token' },
                         { step: 3, label: '3. STS Role' },
-                        { step: 4, label: '4. PrivEsc' },
+                        { step: 4, label: '4. AdminPriv' },
                         { step: 5, label: '5. Exfil' },
                         { step: 6, label: '6. Revoke' }
                       ].map(s => (
@@ -1044,19 +1189,19 @@ export default function App() {
                     <div className="flex items-center space-x-2">
                       <span className="text-cyan-400 font-bold">▶</span>
                       <span>
-                        {simStep === 0 && 'Ready. Select an incident or generate a synthetic attack to highlight attack vectors step-by-step.'}
-                        {simStep === 1 && `[Infiltration Arrow] Principal '${formatIdentity(hopIdentity)}' authenticated via Okta Session '${sessionSlot1}'. Anomaly: Dormant reactivation / Geo delta.`}
-                        {simStep === 2 && `[Token Abuse Arrow] Bearer token assumed. Browser-to-SDK session continuity detected; lateral session probing active.`}
-                        {simStep === 3 && `[STS Role Arrow] Assumed cloud service role '${hopRole}'. Temporary STS security credentials exchanged.`}
-                        {simStep === 4 && `[Privilege Escalation Arrow] IAM policy '${hopPolicy.replace('arn:aws:iam::aws:policy/', '')}' attached to escalate cloud authority.`}
-                        {simStep === 5 && `[Vault Exfiltration Arrow] CRITICAL: Unauthorized s3:GetObject dispatched against '${hopResource}'!`}
-                        {simStep === 6 && `[CONTAINMENT ENFORCED] Zero Trust policy auto-executed REVOKE_SESSION. Session '${sessionSlot1}' terminated for '${formatIdentity(hopIdentity)}'.`}
+                        {simStep === 0 && 'Ready. Select an incident or launch a simulated attack to trace the threat path across all 5 security layers.'}
+                        {simStep === 1 && `[Step 1: Initial Infiltration] Identity '${formatIdentity(hopIdentity)}' authenticated via session '${sessionSlot1}'. Flag: Inactive account woken up from suspicious location.`}
+                        {simStep === 2 && `[Step 2: Hijacked Session] Active login token stolen and used from a new device; lateral probing detected across internal sessions.`}
+                        {simStep === 3 && `[Step 3: Cloud Role Assumed] Attacker pivoted into AWS STS service role '${hopRole}', acquiring temporary cloud credentials.`}
+                        {simStep === 4 && `[Step 4: Unusual Admin Access] Policy '${hopPolicy.replace('arn:aws:iam::aws:policy/', '')}' illicitly attached to elevate permissions to Administrator.`}
+                        {simStep === 5 && `[Step 5: Systems at Risk] CRITICAL: Unauthorized download attempt dispatched against sensitive customer vault '${hopResource}'!`}
+                        {simStep === 6 && `[Step 6: Automated Containment] Emergency Zero Trust safeguard auto-revoked session '${sessionSlot1}'. Threat contained in <1 millisecond.`}
                       </span>
                     </div>
 
                     {simStep === 6 && (
                       <span className="text-[10px] font-bold text-emerald-400 border border-emerald-800/50 bg-[#06180f] px-2 py-0.5 rounded shrink-0">
-                        PROTECTION ACTIVE
+                        CONTAINMENT ACTIVE
                       </span>
                     )}
                   </div>
@@ -1614,37 +1759,43 @@ export default function App() {
           {/* --- TAB 3: AUTONOMOUS MODEL TUNING (Option 3 on Left) --- */}
           {activeTab === 'tuning' && (
             <div className="space-y-6">
+              {/* Executive 1-Line Summary Banner */}
+              <div className="p-3 bg-[#0a0f1d] border border-cyan-900/40 rounded-xl text-xs text-cyan-200/90 font-sans flex items-center space-x-2.5">
+                <span className="text-base shrink-0">💡</span>
+                <span><strong className="text-white">Executive Summary:</strong> Self-tuning risk algorithm that automatically recalibrates factor sensitivity as attack patterns evolve, eliminating manual configuration while preventing confirmation bias.</span>
+              </div>
+
               {/* Header Card */}
               <div className="p-6 border border-[#1c1c26] rounded-2xl bg-[#08080c] space-y-3 shadow-sm font-mono">
                 <div className="flex items-start justify-between">
                   <div>
                     <div className="flex items-center space-x-2">
                       <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider">
-                        Autonomous Factor Tuning
+                        Self-Tuning Risk Model
                       </span>
                       <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-950/60 text-amber-300 border border-amber-800/40">
-                        🔒 User Tamper Restricted
+                        🔒 Zero Trust Tamper Locked
                       </span>
                     </div>
-                    <h2 className="text-lg font-bold text-white mt-1.5">Zero Trust Additive Weight Calibration</h2>
-                    <p className="text-xs text-zinc-400 mt-1 font-sans">
-                      Model factor weights adapt autonomously based on live synthetic threat patterns and detection confidence.
+                    <h2 className="text-lg font-bold text-white mt-1.5">Autonomous Risk Factor Calibration</h2>
+                    <p className="text-xs text-zinc-300 mt-1 font-sans">
+                      Risk weights adapt autonomously based on live threat signals and detection confidence.
                       Manual modifications are strictly locked by Zero Trust governance to prevent human confirmation bias.
                     </p>
                   </div>
                   <div className="text-right text-[11px] text-zinc-400">
-                    <div>Status: <span className="text-emerald-400 font-bold">Self-Calibrating</span></div>
-                    <div>Calibrated Factors: <span className="text-cyan-300 font-bold">{Object.keys(weights).length} Active</span></div>
+                    <div>Engine Status: <span className="text-emerald-400 font-bold">Self-Calibrating</span></div>
+                    <div>Monitored Factors: <span className="text-cyan-300 font-bold">{Object.keys(weights).length} Active</span></div>
                   </div>
                 </div>
 
                 <div className="p-3 bg-[#0c0c12] border border-[#1e1e28] rounded-xl text-xs flex items-center justify-between">
                   <div className="text-zinc-300 font-sans">
-                    <span className="text-cyan-400 font-semibold font-mono">Governed Bounds: </span>
-                    Each weight is mathematically bounded within [0.5×, 2.0×] of its baseline and normalized so ∑ w_i = 1.0.
+                    <span className="text-cyan-400 font-semibold font-mono">Mathematical Safety Bounds: </span>
+                    Each weight is bounded within [0.5×, 2.0×] of baseline and dynamically normalized so ∑ w_i = 1.0.
                   </div>
                   <span className="text-xs font-mono px-2.5 py-1 rounded bg-[#10141f] text-cyan-300 border border-cyan-800/40 shrink-0">
-                    ∑ w_i = 1.00
+                    ∑ w_i = 1.00 Total
                   </span>
                 </div>
               </div>
@@ -1653,30 +1804,38 @@ export default function App() {
               <div className="p-6 border border-[#1c1c26] rounded-2xl bg-[#08080c] space-y-4 shadow-sm font-mono">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
-                      Active Factor Weights & Delta Telemetry
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-300 font-sans">
+                      Top Risk Drivers &amp; Weight Sensitivity
                     </h3>
                     <p className="text-xs text-zinc-400 font-sans">Dynamic sensitivity calibrated across threat archetypes</p>
                   </div>
-                  <span className="text-xs text-zinc-400">Baseline Target: 1.00 Total</span>
+                  <span className="text-xs text-zinc-400 font-mono">Target: 1.00 Total Normalized</span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {Object.entries(weights).map(([factor, weight]) => {
                     const baselineWeight = factor === 'behavioral_anomaly' ? 0.25 : (factor === 'privilege_level' ? 0.20 : (factor === 'privilege_delta' ? 0.25 : 0.15))
                     const deltaPct = (((weight - baselineWeight) / baselineWeight) * 100).toFixed(1)
+                    const disp = getFactorDisplay(factor)
 
                     return (
                       <div key={factor} className="p-4 border border-[#1a1a26] bg-[#09090e] rounded-xl space-y-2.5 hover:border-cyan-500/40 transition-colors">
                         <div className="flex items-center justify-between text-xs">
-                          <span className="font-semibold text-white capitalize">{factor.replace(/_/g, ' ')}</span>
+                          <div>
+                            <span className="font-bold text-white text-xs">{disp.primary}</span>
+                            <span className="text-zinc-500 font-mono text-[10px] ml-1.5">({factor})</span>
+                          </div>
                           <div className="flex items-center space-x-2">
-                            <span className="text-cyan-300 font-bold text-sm">{weight}</span>
-                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${Number(deltaPct) >= 0 ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-800/40' : 'bg-rose-950/80 text-rose-300 border border-rose-800/40'}`}>
+                            <span className="text-cyan-300 font-bold text-sm font-mono">{weight}</span>
+                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded font-mono ${Number(deltaPct) >= 0 ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-800/40' : 'bg-rose-950/80 text-rose-300 border border-rose-800/40'}`}>
                               {Number(deltaPct) >= 0 ? `+${deltaPct}%` : `${deltaPct}%`}
                             </span>
                           </div>
                         </div>
+
+                        <p className="text-[11px] text-zinc-400 font-sans leading-relaxed">
+                          {disp.explanation}
+                        </p>
 
                         <div className="w-full bg-[#121218] h-2 rounded-full overflow-hidden border border-[#1c1c28]">
                           <div
@@ -1686,8 +1845,8 @@ export default function App() {
                         </div>
 
                         <div className="flex items-center justify-between text-[11px] text-zinc-400 pt-1">
-                          <span>Baseline: <span className="text-zinc-300">{baselineWeight}</span></span>
-                          <span className="text-cyan-400/90 flex items-center space-x-1">
+                          <span>Baseline: <span className="text-zinc-300 font-mono">{baselineWeight}</span></span>
+                          <span className="text-cyan-400/90 flex items-center space-x-1 font-sans">
                             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
                             <span>Self-Calibrated</span>
                           </span>
@@ -1702,10 +1861,10 @@ export default function App() {
               <div className="p-6 border border-[#1c1c26] rounded-2xl bg-[#08080c] space-y-4 shadow-sm font-mono">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
-                      Recent Dynamic Calibration Log
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-300 font-sans">
+                      Tamper-Proof Activity Log
                     </h3>
-                    <p className="text-xs text-zinc-400 font-sans">Audit trail of self-tuning weight adjustments triggered by synthetic scenarios</p>
+                    <p className="text-xs text-zinc-400 font-sans">Cryptographically verified audit trail of self-tuning weight adjustments</p>
                   </div>
                   <span className="text-xs text-cyan-400 border border-cyan-800/50 bg-[#07121c] px-2.5 py-0.5 rounded-full">
                     {tuningLog.length} Calibrations Logged
@@ -1715,7 +1874,7 @@ export default function App() {
                 <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
                   {tuningLog.length === 0 ? (
                     <div className="p-8 text-center text-xs text-zinc-500 border border-[#181822] rounded-xl bg-[#06060a]">
-                      No dynamic calibrations recorded yet. Generate a synthetic threat to observe autonomous model tuning.
+                      No dynamic calibrations recorded yet. Launch a simulated threat to observe autonomous model tuning.
                     </div>
                   ) : (
                     [...tuningLog].reverse().map(entry => (
@@ -1751,15 +1910,21 @@ export default function App() {
              ============================================================== */}
           {activeTab === 'mtls' && (
             <div className="space-y-6">
+              {/* Executive 1-Line Summary Banner */}
+              <div className="p-3 bg-[#0a0f1d] border border-cyan-900/40 rounded-xl text-xs text-cyan-200/90 font-sans flex items-center space-x-2.5">
+                <span className="text-base shrink-0">💡</span>
+                <span><strong className="text-white">Executive Summary:</strong> Hardware-grade cryptographic token binding (RFC 8705) that pairs active login tokens to device certificates, verifying authentic user requests in 0.013 ms with zero disruption.</span>
+              </div>
+
               {/* Header Card */}
               <div className="p-6 border border-[#1a1a24] rounded-2xl bg-[#08080c] shadow-[inset_0_2px_4px_rgba(0,0,0,0.8)] space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-lg font-bold text-white flex items-center space-x-2">
                       <span>🔐</span>
-                      <span>Phase 7: Risk-Adaptive mTLS Decision Cache</span>
+                      <span>Speed &amp; Security Monitor (mTLS)</span>
                     </h2>
-                    <p className="text-xs text-zinc-400 mt-1">
+                    <p className="text-xs text-zinc-300 mt-1">
                       Continuous session validation binding TLS client certificates to active identity sessions with sub-millisecond fast-path bypass.
                     </p>
                   </div>
@@ -1779,32 +1944,32 @@ export default function App() {
                 {/* Key Metrics Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-2">
                   <div className="p-3.5 rounded-xl border border-[#181824] bg-[#0c0c12]">
-                    <div className="text-[10px] font-mono text-zinc-400 uppercase">Fast Path Hits</div>
+                    <div className="text-[10px] font-mono text-zinc-400 uppercase">Average Speed (p50)</div>
                     <div className="text-xl font-bold font-mono text-emerald-400 mt-1">
                       {mtlsStats?.fast_path_decisions ?? 0}
                     </div>
-                    <div className="text-[10px] text-zinc-500 mt-0.5">~0.013 ms avg latency</div>
+                    <div className="text-[10px] text-zinc-500 mt-0.5">Fast-Path Hits (~0.013 ms avg)</div>
                   </div>
                   <div className="p-3.5 rounded-xl border border-[#181824] bg-[#0c0c12]">
-                    <div className="text-[10px] font-mono text-zinc-400 uppercase">Full Path Fallbacks</div>
+                    <div className="text-[10px] font-mono text-zinc-400 uppercase">Deep Risk Evaluations</div>
                     <div className="text-xl font-bold font-mono text-sky-400 mt-1">
                       {mtlsStats?.full_path_decisions ?? 0}
                     </div>
-                    <div className="text-[10px] text-zinc-500 mt-0.5">Deep pipeline eval</div>
+                    <div className="text-[10px] text-zinc-500 mt-0.5">Full Path Fallbacks</div>
                   </div>
                   <div className="p-3.5 rounded-xl border border-[#181824] bg-[#0c0c12]">
-                    <div className="text-[10px] font-mono text-zinc-400 uppercase">Cert Mismatches (DET-06)</div>
+                    <div className="text-[10px] font-mono text-zinc-400 uppercase">Stolen Token Blocks</div>
                     <div className="text-xl font-bold font-mono text-rose-400 mt-1">
                       {mtlsStats?.cert_mismatches ?? 0}
                     </div>
-                    <div className="text-[10px] text-rose-500/80 mt-0.5">Stolen token attempts</div>
+                    <div className="text-[10px] text-rose-500/80 mt-0.5">Cert Mismatches (DET-06)</div>
                   </div>
                   <div className="p-3.5 rounded-xl border border-[#181824] bg-[#0c0c12]">
-                    <div className="text-[10px] font-mono text-zinc-400 uppercase">Active Cached Sessions</div>
+                    <div className="text-[10px] font-mono text-zinc-400 uppercase">Active Protected Sessions</div>
                     <div className="text-xl font-bold font-mono text-cyan-400 mt-1">
                       {mtlsStats?.cache_size ?? 0}
                     </div>
-                    <div className="text-[10px] text-zinc-500 mt-0.5">Invalidations: {mtlsStats?.invalidations ?? 0}</div>
+                    <div className="text-[10px] text-zinc-500 mt-0.5">Cache Invalidations: {mtlsStats?.invalidations ?? 0}</div>
                   </div>
                 </div>
               </div>
@@ -1812,14 +1977,18 @@ export default function App() {
               {/* Interactive Simulation Console */}
               <div className="p-6 border border-[#1c1c28] rounded-2xl bg-[#09090e] space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-300 font-mono">
-                    Live mTLS Verification Simulator
-                  </h3>
-                  <span className="text-[10px] font-mono text-cyan-400">RFC 8705 & FIPS Proof</span>
+                  <div>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-200 font-sans">
+                      Safe Test Mode: Live mTLS Verification Simulator
+                    </h3>
+                    <p className="text-[11px] text-zinc-400 font-sans">
+                      Trigger live cryptographic verification scenarios against the running FastAPI engine to verify sub-millisecond fast path caching and instant cache purging upon certificate mismatch.
+                    </p>
+                  </div>
+                  <span className="text-[10px] font-mono text-cyan-400 border border-cyan-800/40 bg-[#08121a] px-2 py-0.5 rounded">
+                    RFC 8705 &amp; FIPS Verified
+                  </span>
                 </div>
-                <p className="text-xs text-zinc-400">
-                  Trigger live cryptographic verification scenarios against the running FastAPI engine to verify sub-millisecond fast path caching and instant cache purging upon certificate mismatch.
-                </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
                   <button
@@ -1829,12 +1998,12 @@ export default function App() {
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-emerald-300 group-hover:text-emerald-200">
-                        1. Legitimate Fast Path
+                        1. Legitimate Fast Path (Zero Lag)
                       </span>
                       <span className="text-xs">⚡</span>
                     </div>
                     <p className="text-[11px] text-emerald-400/80 mt-1">
-                      Simulate Alice with valid certificate. Reuses cached decision (&lt;0.05ms).
+                      Simulate Alice with valid certificate. Reuses cached decision (&lt;0.05ms) with zero latency.
                     </p>
                   </button>
 
@@ -1845,12 +2014,12 @@ export default function App() {
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-rose-300 group-hover:text-rose-200">
-                        2. Token Replay / Mismatch
+                        2. Stolen Token Replay Attack
                       </span>
                       <span className="text-xs">🚨</span>
                     </div>
                     <p className="text-[11px] text-rose-400/80 mt-1">
-                      Attacker presents stolen session with rogue cert. Triggers DET-06 & cache eviction.
+                      Attacker presents stolen session with rogue cert. Triggers DET-06 &amp; instant cache eviction.
                     </p>
                   </button>
 
@@ -1861,7 +2030,7 @@ export default function App() {
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-cyan-300 group-hover:text-cyan-200">
-                        3. Approved Rotation
+                        3. Approved Device Rollover
                       </span>
                       <span className="text-xs">🔄</span>
                     </div>
@@ -1926,8 +2095,8 @@ export default function App() {
 
               {/* Zero Trust Architecture Spec Card */}
               <div className="p-6 border border-[#181824] rounded-2xl bg-[#08080c] space-y-3 font-mono">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
-                  Cryptographic Token-Binding Architecture
+                <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-300 font-sans">
+                  Hardware Token-Binding Security Architecture
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
                   <div className="p-3 rounded-xl border border-[#161620] bg-[#0a0a10]">
@@ -1937,13 +2106,13 @@ export default function App() {
                     </div>
                   </div>
                   <div className="p-3 rounded-xl border border-[#161620] bg-[#0a0a10]">
-                    <div className="text-cyan-400 font-semibold mb-1">2. Sub-Millisecond Fast Path</div>
+                    <div className="text-cyan-400 font-semibold mb-1">2. Worst-Case Speed (p99) &amp; Average Speed (p50)</div>
                     <div className="text-zinc-400 text-[11px]">
                       When risk &lt; 30 and fingerprint matches cached session binding, decisions complete in ~0.013 ms (74,000+ req/sec), bypassing multi-hop graph re-evaluation.
                     </div>
                   </div>
                   <div className="p-3 rounded-xl border border-[#161620] bg-[#0a0a10]">
-                    <div className="text-cyan-400 font-semibold mb-1">3. Atomic Invalidation</div>
+                    <div className="text-cyan-400 font-semibold mb-1">3. Atomic Invalidation (Instant Revoke)</div>
                     <div className="text-zinc-400 text-[11px]">
                       Any certificate mismatch immediately triggers DET-06, evicts the session from cache, and dispatches a REVOKE_SESSION action to prevent unauthorized lateral traversal.
                     </div>
@@ -1955,19 +2124,19 @@ export default function App() {
         </main>
 
         {/* ==============================================================
-            RIGHT COLUMN: Synthetic Attack Threat Feed
+            RIGHT COLUMN: Live Activity Feed (Okta & CloudTrail Stream)
            ============================================================== */}
         <aside className="w-80 shrink-0 border-l border-[#16161e] bg-[#050508] flex flex-col p-4 space-y-3.5 overflow-hidden">
           <div className="flex items-center justify-between pb-2 border-b border-[#181822]">
             <div>
               <h3 className="text-xs font-bold uppercase tracking-wider text-white font-mono flex items-center space-x-1.5">
                 <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-                <span>Synthetic Threat Feed</span>
+                <span>Live Activity Feed</span>
               </h3>
-              <p className="text-[10px] text-zinc-400 font-mono">Real-time generated attack stream</p>
+              <p className="text-[10px] text-zinc-400 font-mono">Okta &amp; AWS CloudTrail Stream</p>
             </div>
             <span className="text-xs font-mono text-zinc-400">
-              {syntheticHistory.length} Detected
+              {syntheticHistory.length} Scenarios
             </span>
           </div>
 
@@ -1975,7 +2144,7 @@ export default function App() {
           <div className="space-y-2.5 flex-1 overflow-y-auto pr-1">
             {syntheticHistory.length === 0 ? (
               <div className="p-6 border border-[#1a1a24] rounded-xl bg-[#08080c] text-center text-xs text-zinc-400 font-mono">
-                No synthetic attacks triggered yet. Click "⚡ Generate Attack" in the left panel to launch a scenario.
+                No simulated attacks launched yet. Click "⚡ Launch Simulated Attack" on the left to test scenarios.
               </div>
             ) : (
               [...syntheticHistory].reverse().map((att, i) => (
@@ -2011,7 +2180,7 @@ export default function App() {
 
                   <div className="flex items-center justify-between pt-1 border-t border-[#14141c] text-[10px] text-zinc-400">
                     <span>Rules: {att.detected_rules.join(', ') || 'N/A'}</span>
-                    <span className="text-cyan-400 hover:text-white">View →</span>
+                    <span className="text-cyan-400 hover:text-white">Investigate →</span>
                   </div>
                 </div>
               ))
@@ -2024,7 +2193,7 @@ export default function App() {
             className="p-2.5 rounded-xl border border-[#181824] hover:border-cyan-500/40 bg-[#08080c] hover:bg-[#0c0c14] cursor-pointer transition-all space-y-1 shrink-0 font-mono"
           >
             <div className="flex items-center justify-between text-[10px]">
-              <span className="font-bold uppercase tracking-wider text-zinc-400">Model Tuning Option</span>
+              <span className="font-bold uppercase tracking-wider text-zinc-300">Self-Tuning Risk Model</span>
               <span className="text-cyan-400 hover:text-cyan-200">Open Module →</span>
             </div>
             {tuningLog.length > 0 ? (
