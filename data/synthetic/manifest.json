@@ -1,0 +1,29 @@
+{
+  "generator": "scripts/generate_dataset.py",
+  "version": "2.0.0",
+  "seed": 42,
+  "generated_at": "2026-10-28T20:36:30.498288+00:00",
+  "config": {
+    "num_identities": 12,
+    "days": 7,
+    "target_events": 250,
+    "num_attacks": 8,
+    "noise_level": 0.05,
+    "difficulty": "standard",
+    "quick": true
+  },
+  "counts": {
+    "okta_events": 118,
+    "cloudtrail_events": 132,
+    "total_events": 250,
+    "attack_episodes": 8,
+    "compromised_identities": 7,
+    "benign_identities": 5
+  },
+  "sha256": {
+    "raw_okta.jsonl": "e5a85da3c786b5671d278fcb178800c7747e0aa4cf4c4ebd5b7fa644a2440019",
+    "raw_cloudtrail.jsonl": "7edbdec704e3168356a1ae380ab71f68f97b2004fe20b40047ef685e22f2e6b0",
+    "labels.json": "ace497997680d7f0479c3e36f1520ca9d4e7396de40d3e89c57be00bf2bc32da",
+    "identities.json": "836f95a93d61e4ba7bf15bbcf24d163b2441ba81ce8f9762e23ec5a6b52dcbc8"
+  }
+}
