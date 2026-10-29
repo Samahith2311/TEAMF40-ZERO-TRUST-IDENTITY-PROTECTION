@@ -32,6 +32,9 @@ app.add_middleware(
 
 @app.middleware("http")
 async def add_security_headers(request, call_next):
+    path = request.scope.get("path", "")
+    if path and not path.startswith("/api") and not path.startswith("/docs") and not path.startswith("/openapi") and path != "/":
+        request.scope["path"] = "/api" + path
     response = await call_next(request)
     response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';"
     response.headers["X-Content-Type-Options"] = "nosniff"
@@ -47,10 +50,18 @@ def sanitize_query_param(val: Any) -> Any:
 
 @app.on_event("startup")
 def startup_populate():
-    db = get_db()
-    if db[COLLECTIONS["alerts"]].count_documents({}) == 0:
-        from src.pipeline import run_pipeline_slice
-        run_pipeline_slice()
+    try:
+        db = get_db()
+        if db[COLLECTIONS["alerts"]].count_documents({}) == 0:
+            from src.pipeline import run_pipeline_slice
+            run_pipeline_slice()
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Startup populate error: {e}", exc_info=True)
+
+@app.get("/")
+def root_index():
+    return {"status": "ok", "service": "zero-trust-engine", "mode": "SIMULATION"}
 
 @app.get("/api/health")
 def health_check():

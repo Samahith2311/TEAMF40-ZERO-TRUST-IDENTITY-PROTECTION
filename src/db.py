@@ -1,3 +1,4 @@
+import os
 import logging
 from pymongo import MongoClient, ASCENDING
 from pymongo.errors import ServerSelectionTimeoutError, ConnectionFailure
@@ -19,9 +20,12 @@ def _get_mock_client():
 def get_client(uri: str = None) -> MongoClient:
     global _client
     if _client is None:
+        if os.getenv("VERCEL") == "1" and "MONGODB_URI" not in os.environ:
+            _client = _get_mock_client()
+            return _client
         target_uri = uri or MONGODB_URI
         try:
-            client = MongoClient(target_uri, serverSelectionTimeoutMS=1000)
+            client = MongoClient(target_uri, serverSelectionTimeoutMS=500)
             client.admin.command("ping")
             _client = client
         except (ServerSelectionTimeoutError, ConnectionFailure, Exception) as e:

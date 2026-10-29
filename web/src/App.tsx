@@ -205,16 +205,31 @@ export default function App() {
     return `${id.slice(0, 3)}***`
   }
 
+  const safeFetch = async <T,>(url: string, fallback: T): Promise<T> => {
+    try {
+      const res = await fetch(url)
+      if (!res.ok) return fallback
+      const text = await res.text()
+      try {
+        return JSON.parse(text)
+      } catch {
+        return fallback
+      }
+    } catch {
+      return fallback
+    }
+  }
+
   const loadData = (selectNewest: boolean = false) => {
     Promise.all([
-      fetch(`${API_BASE}/api/alerts`).then(r => r.json()),
-      fetch(`${API_BASE}/api/chains`).then(r => r.json()),
-      fetch(`${API_BASE}/api/scores`).then(r => r.json()),
-      fetch(`${API_BASE}/api/graph`).then(r => r.json()),
-      fetch(`${API_BASE}/api/feedback/weights`).then(r => r.json()),
-      fetch(`${API_BASE}/api/feedback/tuning-log`).then(r => r.json()).catch(() => ({ tuning_log: [] })),
-      fetch(`${API_BASE}/api/synthetic/history`).then(r => r.json()).catch(() => ({ history: [] })),
-      fetch(`${API_BASE}/api/synthetic/status`).then(r => r.json()).catch(() => ({ auto_streaming: false }))
+      safeFetch(`${API_BASE}/api/alerts`, { alerts: [] }),
+      safeFetch(`${API_BASE}/api/chains`, { chains: [] }),
+      safeFetch(`${API_BASE}/api/scores`, { scores: [] }),
+      safeFetch(`${API_BASE}/api/graph`, { graph: null }),
+      safeFetch(`${API_BASE}/api/feedback/weights`, { weights: {} }),
+      safeFetch(`${API_BASE}/api/feedback/tuning-log`, { tuning_log: [] }),
+      safeFetch(`${API_BASE}/api/synthetic/history`, { history: [] }),
+      safeFetch(`${API_BASE}/api/synthetic/status`, { auto_streaming: false })
     ])
       .then(([alertData, chainData, scoreData, gData, wData, tData, hData, sData]) => {
         const alts: Alert[] = alertData.alerts || []
@@ -254,6 +269,15 @@ export default function App() {
     return () => clearInterval(interval)
   }, [])
 
+  const safeParseResponse = async (r: Response) => {
+    const text = await r.text()
+    try {
+      return JSON.parse(text)
+    } catch {
+      throw new Error(r.ok ? 'Invalid response format' : `Server response (${r.status}): ${text.slice(0, 100)}`)
+    }
+  }
+
   const handleGenerateAttack = (arch?: string) => {
     setGenerating(true)
     setError(null)
@@ -264,7 +288,7 @@ export default function App() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ archetype: targetArch })
     })
-      .then(r => r.json())
+      .then(safeParseResponse)
       .then(res => {
         setGenerating(false)
         if (res.status === 'SUCCESS') {
@@ -289,7 +313,7 @@ export default function App() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ enabled: nextState, interval: 6.0 })
     })
-      .then(r => r.json())
+      .then(safeParseResponse)
       .then(res => {
         setAutoStream(res.auto_streaming)
         setNotification(res.auto_streaming ? '▶ Auto-Streaming Threat Scenarios (Every 6s)' : '⏸ Auto-Streaming Paused')
@@ -310,7 +334,7 @@ export default function App() {
         approver: 'lead_analyst@corp.internal'
       })
     })
-      .then(res => res.json())
+      .then(safeParseResponse)
       .then(data => {
         setSimResult(data.action?.result || 'SUCCESS_SIMULATED')
       })
@@ -327,7 +351,7 @@ export default function App() {
         target: selectedAlert.subject.id
       })
     })
-      .then(res => res.json())
+      .then(safeParseResponse)
       .then(data => {
         setStepUpPrompt(data.prompt || 'MFA challenge dispatched')
       })
@@ -357,7 +381,7 @@ export default function App() {
             current_risk_score: 15
           })
         })
-        const data = await res.json()
+        const data = await safeParseResponse(res)
         setMtlsResult(data)
       } else if (testType === 'replay') {
         const res = await fetch(`${API_BASE}/api/mtls/decide`, {
@@ -370,7 +394,7 @@ export default function App() {
             current_risk_score: 15
           })
         })
-        const data = await res.json()
+        const data = await safeParseResponse(res)
         setMtlsResult(data)
       } else if (testType === 'rotate') {
         const newFp = '11:22:33:44:55:66:77:88:99:00:aa:bb:cc:dd:ee:ff:11:22:33:44:55:66:77:88:99:00:aa:bb:cc:dd:ee:ff'
@@ -393,12 +417,14 @@ export default function App() {
             current_risk_score: 15
           })
         })
-        const data = await res.json()
+        const data = await safeParseResponse(res)
         setMtlsResult(data)
       }
       const statsRes = await fetch(`${API_BASE}/api/mtls/stats`)
-      const statsData = await statsRes.json()
-      setMtlsStats(statsData.stats)
+      if (statsRes.ok) {
+        const statsData = await safeParseResponse(statsRes)
+        if (statsData.stats) setMtlsStats(statsData.stats)
+      }
     } catch (e: any) {
       setError(e.message)
     } finally {
@@ -432,7 +458,7 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       })
-      const data = await res.json()
+      const data = await safeParseResponse(res)
       setCascadeResult(data)
       await fetchMtlsStatus()
     } catch (err: any) {

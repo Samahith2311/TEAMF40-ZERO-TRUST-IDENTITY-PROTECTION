@@ -15,7 +15,13 @@ from src.models import NormalizedEvent, ValidationDetails, ValidationResult
 # Security bounds
 MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024  # 50 MB
 MAX_LINE_LENGTH_BYTES = 1024 * 1024       # 1 MB
-ALLOWED_ROOTS = [Path("fixtures").resolve(), Path("data").resolve()]
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+ALLOWED_ROOTS = [
+    Path("fixtures").resolve(),
+    Path("data").resolve(),
+    (_REPO_ROOT / "fixtures").resolve(),
+    (_REPO_ROOT / "data").resolve()
+]
 
 def validate_file_path(file_path: str) -> Path:
     """Path traversal prevention: must resolve strictly inside allowed directories."""

@@ -57,6 +57,10 @@ def verify_evidence_refs(alerts: List[Dict[str, Any]], fixtures_dir: str = "fixt
     invalid_citations = []
 
     base_path = Path(fixtures_dir)
+    if not base_path.exists():
+        repo_fixtures = Path(__file__).resolve().parent.parent / "fixtures"
+        if repo_fixtures.exists():
+            base_path = repo_fixtures
 
     for alt in alerts:
         for ref in alt.get("evidence_refs", []):

@@ -21,6 +21,23 @@ from src.simulator import execute_simulated_action
 from src.audit import create_audit_entry
 from src.harness import evaluate_pipeline
 
+ROOT_DIR = Path(__file__).resolve().parent.parent
+DEFAULT_FIXTURES_DIR = ROOT_DIR / "fixtures"
+
+def _find_fixture_file(path_str: str) -> Path:
+    p = Path(path_str)
+    if p.is_absolute() and p.exists():
+        return p
+    if p.exists():
+        return p
+    cand1 = DEFAULT_FIXTURES_DIR / p.name
+    if cand1.exists():
+        return cand1
+    cand2 = ROOT_DIR / p
+    if cand2.exists():
+        return cand2
+    return p
+
 def run_pipeline(
     events: Optional[List[Dict[str, Any]]] = None,
     identities_path: str = "fixtures/identities.json",
@@ -40,18 +57,19 @@ def run_pipeline(
     r_okta = {"new_inserted": 0, "duplicates": 0, "invalid_quarantined": 0}
     r_ct = {"new_inserted": 0, "duplicates": 0, "invalid_quarantined": 0}
     if events is None:
-        okta_file = "fixtures/okta_sample.jsonl"
-        ct_file = "fixtures/cloudtrail_sample.jsonl"
-        if Path(okta_file).exists():
-            r_okta = ingest_file(okta_file, db)
-        if Path(ct_file).exists():
-            r_ct = ingest_file(ct_file, db)
+        okta_file = _find_fixture_file("okta_sample.jsonl")
+        ct_file = _find_fixture_file("cloudtrail_sample.jsonl")
+        if okta_file.exists():
+            r_okta = ingest_file(str(okta_file), db)
+        if ct_file.exists():
+            r_ct = ingest_file(str(ct_file), db)
         events = list(db[COLLECTIONS["normalized_events"]].find({}, {"_id": 0}))
 
     # 2. Load identities metadata
     id_map = {}
-    if Path(identities_path).exists():
-        with open(identities_path, "r", encoding="utf-8") as f:
+    id_file = _find_fixture_file(identities_path)
+    if id_file.exists():
+        with open(id_file, "r", encoding="utf-8") as f:
             id_list = json.load(f)
             id_map = {i["identity_key"]: i for i in id_list}
 
@@ -219,7 +237,7 @@ def run_pipeline(
 
     # 8. Evidence Verification
     alerts_dump = [a.model_dump() for a in alerts]
-    verification_report = verify_evidence_refs(alerts_dump, fixtures_dir="fixtures")
+    verification_report = verify_evidence_refs(alerts_dump, fixtures_dir=str(DEFAULT_FIXTURES_DIR if DEFAULT_FIXTURES_DIR.exists() else "fixtures"))
 
     elapsed_ms = (time.perf_counter() - start_time) * 1000.0
 
