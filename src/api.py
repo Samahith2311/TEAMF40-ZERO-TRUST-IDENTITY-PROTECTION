@@ -1,5 +1,6 @@
 import os
 from fastapi import FastAPI, HTTPException, Body
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Dict, Any
 
@@ -29,6 +30,18 @@ app.add_middleware(
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request, exc):
+    import traceback
+    return JSONResponse(
+        status_code=500,
+        content={
+            "status": "ERROR",
+            "detail": str(exc),
+            "traceback": traceback.format_exc()
+        }
+    )
 
 @app.middleware("http")
 async def add_security_headers(request, call_next):
