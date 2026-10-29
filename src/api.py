@@ -45,14 +45,25 @@ async def global_exception_handler(request, exc):
 
 @app.middleware("http")
 async def add_security_headers(request, call_next):
-    path = request.scope.get("path", "")
-    if path and not path.startswith("/api") and not path.startswith("/docs") and not path.startswith("/openapi") and path != "/":
-        request.scope["path"] = "/api" + path
-    response = await call_next(request)
-    response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';"
-    response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["X-Frame-Options"] = "DENY"
-    return response
+    try:
+        path = request.scope.get("path", "")
+        if path and not path.startswith("/api") and not path.startswith("/docs") and not path.startswith("/openapi") and path != "/":
+            request.scope["path"] = "/api" + path
+        response = await call_next(request)
+        response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        return response
+    except Exception as exc:
+        import traceback
+        return JSONResponse(
+            status_code=500,
+            content={
+                "status": "ERROR",
+                "detail": str(exc),
+                "traceback": traceback.format_exc()
+            }
+        )
 
 def sanitize_query_param(val: Any) -> Any:
     if isinstance(val, dict):
@@ -141,10 +152,17 @@ def revert_feedback():
 
 @app.post("/api/synthetic/generate")
 def api_generate_synthetic_attack(payload: Dict[str, Any] = Body(default={})):
-    from src.synthetic_generator import generate_synthetic_attack
-    archetype = payload.get("archetype")
-    result = generate_synthetic_attack(archetype)
-    return result
+    try:
+        from src.synthetic_generator import generate_synthetic_attack
+        archetype = payload.get("archetype")
+        result = generate_synthetic_attack(archetype)
+        return result
+    except Exception as e:
+        import traceback
+        return JSONResponse(
+            status_code=500,
+            content={"status": "ERROR", "detail": str(e), "traceback": traceback.format_exc()}
+        )
 
 @app.get("/api/synthetic/history")
 def api_get_synthetic_history():
