@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Dict, Any
@@ -11,10 +12,19 @@ from src.feedback import get_current_weights, apply_analyst_feedback, revert_las
 
 app = FastAPI(title="Zero Trust Identity Protection API", version="1.0.0")
 
-# Restrict CORS to development frontend origins
+# Allowed origins: local dev, preview Vercel domains, and VERCEL_URL
+cors_origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:3000",
+]
+if os.getenv("VERCEL_URL"):
+    cors_origins.append(f"https://{os.getenv('VERCEL_URL')}")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=cors_origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],

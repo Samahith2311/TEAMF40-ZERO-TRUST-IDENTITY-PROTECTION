@@ -16,3 +16,15 @@ venv/
 *.log
 
 *.zip
+
+# Skillsets and Prompt Playbooks
+cybersecurity-vibecoding-skillpack/
+MASTER_*.md
+*PROMPT*.md
+ponytail.md
+Vibe Coding*.md
+Vibecoding*.md
+
+# PDF Documents
+*.pdf
+

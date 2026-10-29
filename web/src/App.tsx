@@ -192,6 +192,10 @@ export default function App() {
   const selectedAlertRef = useRef<Alert | null>(null)
   selectedAlertRef.current = selectedAlert
 
+  // Base API URL: In Vercel / production or Vite proxy, defaults to relative path ('')
+  // or uses bound service env VITE_API_URL if configured
+  const API_BASE = (import.meta as any).env?.VITE_API_URL || ''
+
   const formatIdentity = (id: string) => {
     if (!maskIdentities) return id
     if (id.includes('@')) {
@@ -203,14 +207,14 @@ export default function App() {
 
   const loadData = (selectNewest: boolean = false) => {
     Promise.all([
-      fetch('http://127.0.0.1:8000/api/alerts').then(r => r.json()),
-      fetch('http://127.0.0.1:8000/api/chains').then(r => r.json()),
-      fetch('http://127.0.0.1:8000/api/scores').then(r => r.json()),
-      fetch('http://127.0.0.1:8000/api/graph').then(r => r.json()),
-      fetch('http://127.0.0.1:8000/api/feedback/weights').then(r => r.json()),
-      fetch('http://127.0.0.1:8000/api/feedback/tuning-log').then(r => r.json()).catch(() => ({ tuning_log: [] })),
-      fetch('http://127.0.0.1:8000/api/synthetic/history').then(r => r.json()).catch(() => ({ history: [] })),
-      fetch('http://127.0.0.1:8000/api/synthetic/status').then(r => r.json()).catch(() => ({ auto_streaming: false }))
+      fetch(`${API_BASE}/api/alerts`).then(r => r.json()),
+      fetch(`${API_BASE}/api/chains`).then(r => r.json()),
+      fetch(`${API_BASE}/api/scores`).then(r => r.json()),
+      fetch(`${API_BASE}/api/graph`).then(r => r.json()),
+      fetch(`${API_BASE}/api/feedback/weights`).then(r => r.json()),
+      fetch(`${API_BASE}/api/feedback/tuning-log`).then(r => r.json()).catch(() => ({ tuning_log: [] })),
+      fetch(`${API_BASE}/api/synthetic/history`).then(r => r.json()).catch(() => ({ history: [] })),
+      fetch(`${API_BASE}/api/synthetic/status`).then(r => r.json()).catch(() => ({ auto_streaming: false }))
     ])
       .then(([alertData, chainData, scoreData, gData, wData, tData, hData, sData]) => {
         const alts: Alert[] = alertData.alerts || []
@@ -255,7 +259,7 @@ export default function App() {
     setError(null)
     const targetArch = arch && arch !== 'RANDOM' ? arch : (selectedArchetype !== 'RANDOM' ? selectedArchetype : undefined)
 
-    fetch('http://127.0.0.1:8000/api/synthetic/generate', {
+    fetch(`${API_BASE}/api/synthetic/generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ archetype: targetArch })
@@ -280,7 +284,7 @@ export default function App() {
 
   const handleToggleAutoStream = () => {
     const nextState = !autoStream
-    fetch('http://127.0.0.1:8000/api/synthetic/auto', {
+    fetch(`${API_BASE}/api/synthetic/auto`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ enabled: nextState, interval: 6.0 })
@@ -296,7 +300,7 @@ export default function App() {
 
   const handleApprove = () => {
     if (!selectedAlert) return
-    fetch('http://127.0.0.1:8000/api/actions/approve', {
+    fetch(`${API_BASE}/api/actions/approve`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -315,7 +319,7 @@ export default function App() {
 
   const handleStepUp = () => {
     if (!selectedAlert) return
-    fetch('http://127.0.0.1:8000/api/actions/step-up', {
+    fetch(`${API_BASE}/api/actions/step-up`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -334,7 +338,7 @@ export default function App() {
     setMtlsLoading(true)
     try {
       if (testType === 'legit') {
-        await fetch('http://127.0.0.1:8000/api/mtls/bind', {
+        await fetch(`${API_BASE}/api/mtls/bind`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -343,7 +347,7 @@ export default function App() {
             fingerprint: 'eb:bf:ba:d4:c7:96:2a:ee:d5:1b:8f:f9:77:e8:14:c1:23:31:e8:3a:9d:08:8c:8f:ad:84:8a:c8:22:23:2e:f9'
           })
         })
-        const res = await fetch('http://127.0.0.1:8000/api/mtls/decide', {
+        const res = await fetch(`${API_BASE}/api/mtls/decide`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -356,7 +360,7 @@ export default function App() {
         const data = await res.json()
         setMtlsResult(data)
       } else if (testType === 'replay') {
-        const res = await fetch('http://127.0.0.1:8000/api/mtls/decide', {
+        const res = await fetch(`${API_BASE}/api/mtls/decide`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -370,7 +374,7 @@ export default function App() {
         setMtlsResult(data)
       } else if (testType === 'rotate') {
         const newFp = '11:22:33:44:55:66:77:88:99:00:aa:bb:cc:dd:ee:ff:11:22:33:44:55:66:77:88:99:00:aa:bb:cc:dd:ee:ff'
-        await fetch('http://127.0.0.1:8000/api/mtls/approve-rotation', {
+        await fetch(`${API_BASE}/api/mtls/approve-rotation`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -379,7 +383,7 @@ export default function App() {
             new_fingerprint: newFp
           })
         })
-        const res = await fetch('http://127.0.0.1:8000/api/mtls/decide', {
+        const res = await fetch(`${API_BASE}/api/mtls/decide`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -392,7 +396,7 @@ export default function App() {
         const data = await res.json()
         setMtlsResult(data)
       }
-      const statsRes = await fetch('http://127.0.0.1:8000/api/mtls/stats')
+      const statsRes = await fetch(`${API_BASE}/api/mtls/stats`)
       const statsData = await statsRes.json()
       setMtlsStats(statsData.stats)
     } catch (e: any) {
@@ -404,7 +408,7 @@ export default function App() {
 
   const fetchMtlsStatus = async () => {
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/mtls/status')
+      const res = await fetch(`${API_BASE}/api/mtls/status`)
       if (res.ok) {
         const data = await res.json()
         setMtlsStatusData(data)
@@ -418,8 +422,8 @@ export default function App() {
     setCascadeType(type)
     try {
       const endpoint = type === 'legit'
-        ? 'http://127.0.0.1:8000/api/mtls/simulate-cascade'
-        : 'http://127.0.0.1:8000/api/mtls/simulate-hijack'
+        ? `${API_BASE}/api/mtls/simulate-cascade`
+        : `${API_BASE}/api/mtls/simulate-hijack`
       const body = type === 'legit'
         ? { identity: 'bob.contractor@corp.internal', cert_alias: 'bob', hops: 25 }
         : { identity: 'bob.contractor@corp.internal', cert_alias: 'bob', hijack_hop: 12, hops: 25 }
@@ -748,7 +752,7 @@ export default function App() {
             <div
               onClick={() => {
                 setActiveTab('mtls')
-                fetch('http://127.0.0.1:8000/api/mtls/stats')
+                fetch(`${API_BASE}/api/mtls/stats`)
                   .then(r => r.json())
                   .then(d => setMtlsStats(d.stats))
                   .catch(() => {})
@@ -2012,7 +2016,7 @@ export default function App() {
                     <button
                       onClick={() => {
                         fetchMtlsStatus()
-                        fetch('http://127.0.0.1:8000/api/mtls/stats')
+                        fetch(`${API_BASE}/api/mtls/stats`)
                           .then(r => r.json())
                           .then(d => setMtlsStats(d.stats))
                           .catch(() => {})
